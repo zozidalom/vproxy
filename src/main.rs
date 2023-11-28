@@ -169,10 +169,12 @@ impl Proxy {
 
             match (self.ipv6_subnet, self.fallback_ipv4) {
                 (Some(v6), Some(v4)) => {
-                    connector.set_local_addresses(v4, v6.first_address().into());
+                    let v6 = Self::get_rand_ipv6(v6.first_address().into(), v6.network_length());
+                    connector.set_local_addresses(v4, v6.into());
                 }
                 (Some(v6), None) => {
-                    connector.set_local_address(Some(v6.first_address().into()));
+                    let v6 = Self::get_rand_ipv6(v6.first_address().into(), v6.network_length());
+                    connector.set_local_address(Some(v6.into()));
                 }
                 (None, Some(v4)) => connector.set_local_address(Some(v4.into())),
                 _ => {}

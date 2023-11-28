@@ -20,7 +20,7 @@ use getopts::Options;
 use std::env;
 
 fn print_usage(program: &str, opts: Options) {
-    let brief = format!("Usage: {} [options]", program);
+    let brief = format!("Random IPv6 request proxy\n\nUsage: {} [options]", program);
     print!("{}", opts.usage(&brief));
 }
 

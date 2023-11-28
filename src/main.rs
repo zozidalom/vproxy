@@ -59,16 +59,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Fallback ipv4
     let interface = matches.opt_str("f");
 
-    if let (Some(v6), Some(v4)) = (ipv6_subnet, interface) {
-        let ipv4 = v4
-            .parse::<std::net::Ipv4Addr>()
-            .expect("invalid ipv4 address");
-        let ipv6 = v6.parse::<cidr::Ipv6Cidr>().expect("invalid ipv6 subnet");
-        run(bind_addr, Some(ipv6), Some(ipv4)).await?;
-    } else {
-        run(bind_addr, None, None).await?;
-    }
-
+    //Parse address
+    let (v6, v4) = match (ipv6_subnet, interface) {
+        (Some(v6), Some(v4)) => {
+            let ipv4 = v4.parse::<std::net::Ipv4Addr>()?;
+            let ipv6 = v6.parse::<cidr::Ipv6Cidr>()?;
+            (Some(ipv6), Some(ipv4))
+        }
+        (None, Some(v4)) => {
+            let ipv4 = v4.parse::<std::net::Ipv4Addr>()?;
+            (None, Some(ipv4))
+        }
+        (Some(v6), None) => {
+            let ipv6 = v6.parse::<cidr::Ipv6Cidr>()?;
+            (Some(ipv6), None)
+        }
+        _ => (None, None),
+    };
+    // Start proxy
+    run(bind_addr, v6, v4).await?;
     Ok(())
 }
 
@@ -157,14 +166,16 @@ impl Proxy {
             }
         } else {
             let mut connector = HttpConnector::new();
-            if let (Some(v6), Some(v4)) = (self.ipv6_subnet, self.fallback_ipv4) {
-                let bind_v6_addr =
-                    Self::get_rand_ipv6(v6.first_address().into(), v6.network_length());
-                connector.set_local_addresses(v4, bind_v6_addr);
-                println!(
-                    "{} via {bind_v6_addr}",
-                    req.uri().host().unwrap_or_default()
-                );
+
+            match (self.ipv6_subnet, self.fallback_ipv4) {
+                (Some(v6), Some(v4)) => {
+                    connector.set_local_addresses(v4, v6.first_address().into());
+                }
+                (Some(v6), None) => {
+                    connector.set_local_address(Some(v6.first_address().into()));
+                }
+                (None, Some(v4)) => connector.set_local_address(Some(v4.into())),
+                _ => {}
             }
 
             let client = Client::builder(TokioExecutor::new())

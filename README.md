@@ -8,7 +8,7 @@ Supports issuing each request from a random IPv6 address within the IPv6 subnet,
 $ v6p -h
 Random IPv6 request proxy
 
-Usage: target/debug/v6p [options]
+Usage: v6p [options]
 
 Options:
     -b, --bind          Proxy bind address

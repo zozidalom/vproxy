@@ -183,6 +183,7 @@ impl Proxy {
             let client = Client::builder(TokioExecutor::new())
                 .http1_title_case_headers(true)
                 .http1_preserve_header_case(true)
+                .http2_keep_alive_interval(None)
                 .http2_only(false)
                 .build(connector);
 

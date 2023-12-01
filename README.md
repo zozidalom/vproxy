@@ -10,7 +10,7 @@ Taking [tunnelbroker](https://tunnelbroker.net/) / `Debian10` as an example, mak
 sysctl net.ipv6.ip_nonlocal_bind=1
 
 # Replace your IPv6 subnet
-ip route add local 2001:db8::/32 dev lo
+ip route add local 2001:470:e953::/48 dev lo
 
 nohup v6p -i 2001:470:e953::/48 &
 

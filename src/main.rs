@@ -31,7 +31,7 @@ fn print_usage(program: &str, opts: Options) {
 //    $ export https_proxy=http://127.0.0.1:8100
 // 3. send requests
 //    $ curl -i https://www.some_domain.com/
-#[tokio::main]
+#[tokio::main(flavor = "multi_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = env::args().collect();
     let program = args[0].clone();
@@ -183,8 +183,6 @@ impl Proxy {
             let client = Client::builder(TokioExecutor::new())
                 .http1_title_case_headers(true)
                 .http1_preserve_header_case(true)
-                .http2_keep_alive_interval(None)
-                .http2_only(false)
                 .build(connector);
 
             let resp = client.request(req).await.unwrap();

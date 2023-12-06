@@ -22,9 +22,29 @@ bytes = "1.5.0"
 pin-project-lite = "0.2.13"
 http = "1.0.0"
 
+# allocator
+tcmalloc = { version = "0.3.0", optional = true }
+snmalloc-rs = { version = "0.3.4", optional = true }
+rpmalloc = { version = "0.2.2", optional = true }
+jemallocator = { package = "tikv-jemallocator", version = "0.5.4", optional = true }
+mimalloc = { version = "0.1.39", default-features = false, optional = true }
+
 [target.'cfg(target_os = "linux")'.dependencies]
 sysctl = "0.5.5"
 nix = { version = "0.27.1", features = ["user"] }
+
+[features]
+default = ["mimalloc"]
+# Enable jemalloc for binaries
+jemalloc = ["jemallocator"]
+# Enable bundled tcmalloc
+tcmalloc = ["tcmalloc/bundled"]
+# Enable snmalloc for binaries
+snmalloc = ["snmalloc-rs"]
+# Enable bundled rpmalloc
+rpmalloc = ["dep:rpmalloc"]
+# Enable mimalloc for binaries
+mimalloc = ["dep:mimalloc"]
 
 [profile.release]
 strip = true

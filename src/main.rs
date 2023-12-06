@@ -1,3 +1,4 @@
+mod allocator;
 mod support;
 mod util;
 use hyper_util::client::legacy::connect::HttpConnector;

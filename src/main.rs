@@ -1,4 +1,5 @@
 mod support;
+mod util;
 use hyper_util::client::legacy::connect::HttpConnector;
 use hyper_util::client::legacy::Client;
 use hyper_util::rt::TokioExecutor;
@@ -76,6 +77,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         _ => (None, None),
     };
+
+    // Auto set sysctl
+    #[cfg(target_os = "linux")]
+    v6.map(|v6| {
+        util::sysctl_ipv6_no_local_bind();
+        util::sysctl_route_add_ipv6_subnet(&v6);
+    });
+
     // Start proxy
     run(bind_addr, v6, v4).await?;
     Ok(())

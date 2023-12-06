@@ -86,8 +86,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     });
 
     // Start proxy
-    run(bind_addr, v6, v4).await?;
-    Ok(())
+    Ok(run(bind_addr, v6, v4).await?)
 }
 
 async fn run(

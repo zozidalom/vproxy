@@ -16,7 +16,7 @@ getopts = "0.2.21"
 hyper = { version = "1.1.0", features = ["http1", "server"] }
 hyper-util = { version = "0.1.2", features = ["full"] }
 http-body-util = "0.1"
-tokio = { version = "1.34.0", features = ["net", "rt-multi-thread", "macros", "io-util"] }
+tokio = { version = "1.35.1", features = ["net", "rt-multi-thread", "macros", "io-util"] }
 rand = "0.8.5"
 bytes = "1.5.0"
 pin-project-lite = "0.2.13"

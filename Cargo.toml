@@ -1,13 +1,13 @@
 [package]
-name = "v6p"
+name = "vproxy"
 version = "0.1.0"
 edition = "2021"
 authors = ["gngppz@gmail.com"]
 description = "Random IPv6 request proxy (Fallback Ipv4)"
 readme = "README.md"
 license = "MIT"
-homepage = "https://github.com/gngpp/v6p"
-repository = "https://github.com/gngpp/v6p"
+homepage = "https://github.com/gngpp/vproxy"
+repository = "https://github.com/gngpp/vproxy"
 
 
 [dependencies]

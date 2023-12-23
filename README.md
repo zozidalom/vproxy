@@ -1,4 +1,4 @@
-# v6p
+# vproxy
 
 Make the request using a random IPv6 address within the IPv6 subnet
 
@@ -12,7 +12,7 @@ sysctl net.ipv6.ip_nonlocal_bind=1
 # Replace your IPv6 subnet
 ip route add local 2001:470:e953::/48 dev lo
 
-nohup v6p -i 2001:470:e953::/48 &
+nohup vproxy -i 2001:470:e953::/48 &
 
 while true; do curl -x http://127.0.0.1:8100 -s https://api.ip.sb/ip -A Mozilla; done
 ...
@@ -35,10 +35,10 @@ while true; do curl -x http://127.0.0.1:8100 -s https://api.ip.sb/ip -A Mozilla;
 - `--ipv6-subnet`, IPv6 subnet
 
 ```shell
-$ v6p -h
+$ vproxy -h
 Random IPv6 request proxy
 
-Usage: v6p [options]
+Usage: vproxy [options]
 
 Options:
     -b, --bind          Proxy bind address
@@ -52,18 +52,18 @@ Options:
 - Linux compile, Ubuntu machine for example:
 
 ```shell
-git clone https://github.com/gngpp/v6p.git && cd v6p
+git clone https://github.com/gngpp/vproxy.git && cd vproxy
 cargo build --release
 ```
 
 ### Contributing
 
-If you would like to submit your contribution, please open a [Pull Request](https://github.com/gngpp/v6p/pulls).
+If you would like to submit your contribution, please open a [Pull Request](https://github.com/gngpp/vproxy/pulls).
 
 ### Getting help
 
-Your question might already be answered on the [issues](https://github.com/gngpp/v6p/issues)
+Your question might already be answered on the [issues](https://github.com/gngpp/vproxy/issues)
 
 ## Author
 
-**v6p** © [gngpp](https://github.com/gngpp), Released under the [MIT](./LICENSE) License.
+**vproxy** © [gngpp](https://github.com/gngpp), Released under the [MIT](./LICENSE) License.

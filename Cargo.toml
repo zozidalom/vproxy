@@ -14,7 +14,7 @@ repository = "https://github.com/gngpp/vproxy"
 cidr = "0.2.2"
 getopts = "0.2.21"
 hyper = { version = "1.0.1", features = ["http1", "server"] }
-hyper-util = { version = "0.1.1", features = ["full"] }
+hyper-util = { version = "0.1.2", features = ["full"] }
 http-body-util = "0.1"
 tokio = { version = "1.34.0", features = ["net", "rt-multi-thread", "macros", "io-util"] }
 rand = "0.8.5"

@@ -87,7 +87,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     });
 
     // Start proxy
-    Ok(run(bind_addr, v6, v4).await?)
+    run(bind_addr, v6, v4).await
 }
 
 async fn run(
@@ -95,7 +95,7 @@ async fn run(
     ipv6_subnet: Option<cidr::Ipv6Cidr>,
     fallback_ipv4: Option<std::net::Ipv4Addr>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let addr = SocketAddr::from(bind_addr.parse::<std::net::SocketAddr>()?);
+    let addr = bind_addr.parse::<SocketAddr>()?;
     let listener = TcpListener::bind(addr).await?;
     println!("Listening on http://{}", addr);
 

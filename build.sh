@@ -134,10 +134,14 @@ build_windows_target() {
 # upx and move target
 compress_and_move() {
   build_target=$1
-  target_dir="${root}/target/${build_target}/release"
-  sudo chmod +x "${target_dir}/${name}"
+  target_dir="target/${build_target}/release"
+  bin_name=$name
+  if [[ $build_target == *windows* ]]; then
+    bin_name="${name}.exe"
+  fi
+  sudo chmod +x "${target_dir}/${bin_name}"
   cd "${target_dir}"
-  tar czvf $name-$tag-${build_target}.tar.gz $name
+  tar czvf $name-$tag-${build_target}.tar.gz $bin_name
   shasum -a 256 $name-$tag-${build_target}.tar.gz >$name-$tag-${build_target}.tar.gz.sha256
   mv $name-$tag-${build_target}.tar.gz $root/bin/
   mv $name-$tag-${build_target}.tar.gz.sha256 $root/bin/

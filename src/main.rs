@@ -8,6 +8,7 @@ use rand::Rng;
 use support::TokioIo;
 
 use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr, ToSocketAddrs};
+use std::sync::Arc;
 
 use bytes::Bytes;
 use http_body_util::{combinators::BoxBody, BodyExt, Empty, Full};
@@ -99,18 +100,16 @@ async fn run(
     let listener = TcpListener::bind(addr).await?;
     println!("Listening on http://{}", addr);
 
+    let proxy = Arc::new(Proxy::new(ipv6_subnet, fallback_ipv4));
     loop {
         let (stream, _) = listener.accept().await?;
         let io = TokioIo::new(stream);
-
+        let p = proxy.clone();
         tokio::task::spawn(async move {
             if let Err(err) = http1::Builder::new()
                 .preserve_header_case(true)
                 .title_case_headers(true)
-                .serve_connection(
-                    io,
-                    service_fn(move |req| Proxy::new(ipv6_subnet, fallback_ipv4).proxy(req)),
-                )
+                .serve_connection(io, service_fn(move |req| p.proxy(req)))
                 .with_upgrades()
                 .await
             {
@@ -120,7 +119,7 @@ async fn run(
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 struct Proxy {
     ipv6_subnet: Option<cidr::Ipv6Cidr>,
     fallback_ipv4: Option<Ipv4Addr>,
@@ -136,7 +135,10 @@ impl Proxy {
     async fn proxy(
         self,
         req: Request<hyper::body::Incoming>,
-    ) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
+    ) -> Result<
+        Response<BoxBody<Bytes, hyper::Error>>,
+        Box<dyn std::error::Error + Send + Sync + 'static>,
+    > {
         println!("req: {:?}", req);
 
         if Method::CONNECT == req.method() {
@@ -194,7 +196,7 @@ impl Proxy {
                 .http1_preserve_header_case(true)
                 .build(connector);
 
-            let resp = client.request(req).await.unwrap();
+            let resp = client.request(req).await?;
             Ok(resp.map(|b| b.boxed()))
         }
     }

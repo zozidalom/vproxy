@@ -145,7 +145,7 @@ impl HttpProxy {
     // Create a TCP connection to host:port, build a tunnel between the connection and
     // the upgraded connection
     async fn tunnel(self, upgraded: Upgraded, addr_str: String) -> std::io::Result<()> {
-        if let Some(addr) = (addr_str.to_socket_addrs()?).next() {
+        for addr in addr_str.to_socket_addrs()? {
             let (socket, bind_addr) = match (self.ipv6_subnet, self.fallback) {
                 (Some(v6), _) => {
                     let socket = TcpSocket::new_v6()?;
@@ -173,21 +173,22 @@ impl HttpProxy {
             };
 
             // Bind to local address
-            socket.bind(bind_addr)?;
+            if socket.bind(bind_addr).is_ok() {
+                tracing::info!("Tunnel: {} via {}", addr_str, bind_addr);
+                let mut server = socket.connect(addr).await?;
 
-            tracing::info!("Tunnel: {} via {}", addr_str, bind_addr);
-            let mut server = socket.connect(addr).await?;
+                // Proxying data
+                let (from_client, from_server) =
+                    tokio::io::copy_bidirectional(&mut TokioIo::new(upgraded), &mut server).await?;
 
-            // Proxying data
-            let (from_client, from_server) =
-                tokio::io::copy_bidirectional(&mut TokioIo::new(upgraded), &mut server).await?;
-
-            // Print message when done
-            tracing::debug!(
-                "client wrote {} bytes and received {} bytes",
-                from_client,
-                from_server
-            );
+                // Print message when done
+                tracing::debug!(
+                    "client wrote {} bytes and received {} bytes",
+                    from_client,
+                    from_server
+                );
+                return Ok(());
+            }
         }
 
         Ok(())

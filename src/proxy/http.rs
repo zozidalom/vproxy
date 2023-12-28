@@ -5,7 +5,7 @@ use hyper_util::client::legacy::Client;
 use hyper_util::rt::TokioExecutor;
 use rand::Rng;
 
-use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, ToSocketAddrs};
+use std::net::{IpAddr, Ipv6Addr, SocketAddr, ToSocketAddrs};
 use std::sync::Arc;
 
 use bytes::Bytes;
@@ -15,7 +15,7 @@ use hyper::service::service_fn;
 use hyper::upgrade::Upgraded;
 use hyper::{Method, Request, Response};
 
-use tokio::net::{TcpListener, TcpSocket};
+use tokio::net::{TcpListener, TcpSocket, TcpStream};
 
 pub(super) async fn run(args: BootArgs) -> crate::Result<()> {
     tracing::info!("Listening on http://{}", args.bind);
@@ -144,53 +144,60 @@ impl HttpProxy {
 
     // Create a TCP connection to host:port, build a tunnel between the connection and
     // the upgraded connection
-    async fn tunnel(self, upgraded: Upgraded, addr_str: String) -> std::io::Result<()> {
+    async fn tunnel(&self, upgraded: Upgraded, addr_str: String) -> std::io::Result<()> {
         for addr in addr_str.to_socket_addrs()? {
-            let (socket, bind_addr) = match (self.ipv6_subnet, self.fallback) {
-                (Some(v6), _) => {
-                    let socket = TcpSocket::new_v6()?;
-                    let bind_addr = SocketAddr::new(
-                        Self::get_rand_ipv6(v6.first_address().into(), v6.network_length()).into(),
-                        0,
-                    );
-                    (socket, bind_addr)
+            if let Some((socket, bind_addr)) = self.get_socket_and_bind_addr() {
+                if socket.bind(bind_addr).is_ok() {
+                    if let Ok(mut server) = socket.connect(addr).await {
+                        tracing::info!("tunnel: {} via {}", addr_str, server.local_addr()?);
+                        Self::tunnel_proxy(upgraded, &mut server).await?;
+                        return Ok(());
+                    }
                 }
-                (_, Some(IpAddr::V4(v4))) => {
-                    let socket = TcpSocket::new_v4()?;
-                    let bind_addr = SocketAddr::new(IpAddr::V4(v4), 0);
-                    (socket, bind_addr)
-                }
-                (_, Some(IpAddr::V6(v6))) => {
-                    let socket = TcpSocket::new_v6()?;
-                    let bind_addr = SocketAddr::new(IpAddr::V6(v6), 0);
-                    (socket, bind_addr)
-                }
-                (_, None) => {
-                    let socket = TcpSocket::new_v4()?;
-                    let bind_addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::UNSPECIFIED), 0);
-                    (socket, bind_addr)
-                }
-            };
-
-            // Bind to local address
-            if socket.bind(bind_addr).is_ok() {
-                tracing::info!("Tunnel: {} via {}", addr_str, bind_addr);
-                let mut server = socket.connect(addr).await?;
-
-                // Proxying data
-                let (from_client, from_server) =
-                    tokio::io::copy_bidirectional(&mut TokioIo::new(upgraded), &mut server).await?;
-
-                // Print message when done
-                tracing::debug!(
-                    "client wrote {} bytes and received {} bytes",
-                    from_client,
-                    from_server
-                );
+            } else if let Ok(mut server) = TcpStream::connect(addr).await {
+                tracing::info!("tunnel: {} via {}", addr_str, server.local_addr()?);
+                Self::tunnel_proxy(upgraded, &mut server).await?;
                 return Ok(());
             }
         }
 
+        Ok(())
+    }
+
+    /// Get a socket and a bind address
+    fn get_socket_and_bind_addr(self) -> Option<(TcpSocket, SocketAddr)> {
+        match (self.ipv6_subnet, self.fallback) {
+            (Some(v6), _) => {
+                let socket = TcpSocket::new_v6().ok()?;
+                let bind_addr = SocketAddr::new(
+                    Self::get_rand_ipv6(v6.first_address().into(), v6.network_length()).into(),
+                    0,
+                );
+                Some((socket, bind_addr))
+            }
+            (_, Some(IpAddr::V4(v4))) => {
+                let socket = TcpSocket::new_v4().ok()?;
+                let bind_addr = SocketAddr::new(IpAddr::V4(v4), 0);
+                Some((socket, bind_addr))
+            }
+            (_, Some(IpAddr::V6(v6))) => {
+                let socket = TcpSocket::new_v6().ok()?;
+                let bind_addr = SocketAddr::new(IpAddr::V6(v6), 0);
+                Some((socket, bind_addr))
+            }
+            _ => None,
+        }
+    }
+
+    /// Proxy data between upgraded connection and server
+    async fn tunnel_proxy(upgraded: Upgraded, server: &mut TcpStream) -> std::io::Result<()> {
+        let (from_client, from_server) =
+            tokio::io::copy_bidirectional(&mut TokioIo::new(upgraded), server).await?;
+        tracing::debug!(
+            "client wrote {} bytes and received {} bytes",
+            from_client,
+            from_server
+        );
         Ok(())
     }
 

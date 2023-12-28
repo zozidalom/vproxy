@@ -1,30 +1,90 @@
 pub mod alloc;
+#[cfg(target_family = "unix")]
+mod daemon;
+mod error;
+mod proxy;
 mod support;
 mod util;
-use hyper_util::client::legacy::connect::HttpConnector;
-use hyper_util::client::legacy::Client;
-use hyper_util::rt::TokioExecutor;
-use rand::Rng;
-use support::TokioIo;
+use clap::{Args, Parser, Subcommand};
 
-use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr, ToSocketAddrs};
-use std::sync::Arc;
+use std::{net::SocketAddr, path::PathBuf};
 
-use bytes::Bytes;
-use http_body_util::{combinators::BoxBody, BodyExt, Empty, Full};
-use hyper::server::conn::http1;
-use hyper::service::service_fn;
-use hyper::upgrade::Upgraded;
-use hyper::{Method, Request, Response};
+type Result<T, E = error::Error> = std::result::Result<T, E>;
 
-use tokio::net::{TcpListener, TcpSocket, TcpStream};
+#[derive(Parser)]
+#[clap(author, version, about, arg_required_else_help = true)]
+#[command(args_conflicts_with_subcommands = true)]
+struct Opt {
+    #[clap(subcommand)]
+    commands: Commands,
+}
 
-use getopts::Options;
-use std::env;
+#[derive(Subcommand)]
+pub enum Commands {
+    /// Run server
+    Run(BootArgs),
+    /// Start server daemon
+    #[cfg(target_family = "unix")]
+    Start(BootArgs),
+    /// Stop server daemon
+    #[cfg(target_family = "unix")]
+    Stop,
+    /// Show the server daemon process
+    #[cfg(target_family = "unix")]
+    Status,
+    /// Show the server daemon log
+    #[cfg(target_family = "unix")]
+    Log,
+}
 
-fn print_usage(program: &str, opts: Options) {
-    let brief = format!("Random IPv6 request proxy\n\nUsage: {} [options]", program);
-    print!("{}", opts.usage(&brief));
+#[derive(Args, Clone, Debug)]
+pub struct BootArgs {
+    /// Debug mode
+    #[clap(short = 'L', long, global = true, env = "VPROXY_DEBUG")]
+    debug: bool,
+    /// Bind address
+    #[clap(short = 'B', long, default_value = "0.0.0.0:8100")]
+    bind: SocketAddr,
+    /// Basic auth username
+    #[clap(short = 'u', long)]
+    auth_user: Option<String>,
+    /// Basic auth password
+    #[clap(short = 'p', long)]
+    auth_pass: Option<String>,
+    /// TLS certificate file
+    #[clap(short = 'C', long)]
+    tls_cert: Option<PathBuf>,
+    /// TLS private key file
+    #[clap(short = 'K', long)]
+    tls_key: Option<PathBuf>,
+    /// Ipv6 subnet, e.g. 2001:db8::/32
+    #[clap(short = 'i', long)]
+    ipv6_subnet: Option<cidr::Ipv6Cidr>,
+    /// Fallback address
+    #[clap(short = 'f', long)]
+    fallback: Option<std::net::IpAddr>,
+    /// Proxy type, e.g. http, https, socks5
+    #[clap(short = 't', long, default_value = "http")]
+    typed: ProxyType,
+}
+
+#[derive(Clone, Debug)]
+pub enum ProxyType {
+    Http,
+    Https,
+    Socks5,
+}
+
+impl std::str::FromStr for ProxyType {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "http" => Ok(Self::Http),
+            "https" => Ok(Self::Https),
+            "socks5" => Ok(Self::Socks5),
+            _ => Err("".to_string()),
+        }
+    }
 }
 
 // To try this example:
@@ -34,245 +94,20 @@ fn print_usage(program: &str, opts: Options) {
 //    $ export https_proxy=http://127.0.0.1:8100
 // 3. send requests
 //    $ curl -i https://www.some_domain.com/
-#[tokio::main(flavor = "multi_thread")]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let args: Vec<String> = env::args().collect();
-    let program = args[0].clone();
+fn main() -> crate::Result<()> {
+    let opt = Opt::parse();
 
-    let mut opts = Options::new();
-    opts.optopt("b", "bind", "Proxy bind address", "");
-    opts.optopt("f", "fallback", "Fallback ipv4", "");
-    opts.optopt("i", "ipv6-subnet", "IPv6 Subnet: 2001:db8::/32", "");
-    opts.optflag("h", "help", "print this help menu");
-    let matches = match opts.parse(&args[1..]) {
-        Ok(m) => m,
-        Err(f) => {
-            panic!("{}", f.to_string())
-        }
-    };
-    if matches.opt_present("h") {
-        print_usage(&program, opts);
-        return Ok(());
-    }
-
-    // Listen address
-    let bind_addr = matches.opt_str("b").unwrap_or("0.0.0.0:8100".to_string());
-    // IPv6 subnet output
-    let ipv6_subnet = matches.opt_str("i");
-    // Fallback ipv4
-    let interface = matches.opt_str("f");
-
-    //Parse address
-    let (v6, v4) = match (ipv6_subnet, interface) {
-        (Some(v6), Some(v4)) => {
-            let ipv4 = v4.parse::<std::net::Ipv4Addr>()?;
-            let ipv6 = v6.parse::<cidr::Ipv6Cidr>()?;
-            (Some(ipv6), Some(ipv4))
-        }
-        (None, Some(v4)) => {
-            let ipv4 = v4.parse::<std::net::Ipv4Addr>()?;
-            (None, Some(ipv4))
-        }
-        (Some(v6), None) => {
-            let ipv6 = v6.parse::<cidr::Ipv6Cidr>()?;
-            (Some(ipv6), None)
-        }
-        _ => (None, None),
+    match opt.commands {
+        Commands::Run(args) => proxy::run(args)?,
+        #[cfg(target_family = "unix")]
+        Commands::Start(args) => daemon::start(args)?,
+        #[cfg(target_family = "unix")]
+        Commands::Stop => daemon::stop()?,
+        #[cfg(target_family = "unix")]
+        Commands::Status => daemon::status(),
+        #[cfg(target_family = "unix")]
+        Commands::Log => daemon::log()?,
     };
 
-    // Auto set sysctl
-    #[cfg(target_os = "linux")]
-    v6.map(|v6| {
-        util::sysctl_ipv6_no_local_bind();
-        util::sysctl_route_add_ipv6_subnet(&v6);
-    });
-
-    // Start proxy
-    run(bind_addr, v6, v4).await
-}
-
-async fn run(
-    bind_addr: String,
-    ipv6_subnet: Option<cidr::Ipv6Cidr>,
-    fallback_ipv4: Option<std::net::Ipv4Addr>,
-) -> Result<(), Box<dyn std::error::Error>> {
-    let addr = bind_addr.parse::<SocketAddr>()?;
-    let listener = TcpListener::bind(addr).await?;
-    println!("Listening on http://{}", addr);
-
-    let proxy = Arc::new(Proxy::new(ipv6_subnet, fallback_ipv4));
-    loop {
-        let (stream, _) = listener.accept().await?;
-        let io = TokioIo::new(stream);
-        let p = proxy.clone();
-        tokio::task::spawn(async move {
-            if let Err(err) = http1::Builder::new()
-                .preserve_header_case(true)
-                .title_case_headers(true)
-                .serve_connection(io, service_fn(move |req| p.proxy(req)))
-                .with_upgrades()
-                .await
-            {
-                println!("Failed to serve connection: {:?}", err);
-            }
-        });
-    }
-}
-
-#[derive(Clone, Copy)]
-struct Proxy {
-    ipv6_subnet: Option<cidr::Ipv6Cidr>,
-    fallback_ipv4: Option<Ipv4Addr>,
-}
-
-impl Proxy {
-    fn new(ipv6_subnet: Option<cidr::Ipv6Cidr>, fallback_ipv4: Option<Ipv4Addr>) -> Self {
-        Self {
-            ipv6_subnet,
-            fallback_ipv4,
-        }
-    }
-    async fn proxy(
-        self,
-        req: Request<hyper::body::Incoming>,
-    ) -> Result<
-        Response<BoxBody<Bytes, hyper::Error>>,
-        Box<dyn std::error::Error + Send + Sync + 'static>,
-    > {
-        println!("req: {:?}", req);
-
-        if Method::CONNECT == req.method() {
-            // Received an HTTP request like:
-            // ```
-            // CONNECT www.domain.com:443 HTTP/1.1
-            // Host: www.domain.com:443
-            // Proxy-Connection: Keep-Alive
-            // ```
-            //
-            // When HTTP method is CONNECT we should return an empty body
-            // then we can eventually upgrade the connection and talk a new protocol.
-            //
-            // Note: only after client received an empty body with STATUS_OK can the
-            // connection be upgraded, so we can't return a response inside
-            // `on_upgrade` future.
-            if let Some(addr) = Self::host_addr(req.uri()) {
-                tokio::task::spawn(async move {
-                    match hyper::upgrade::on(req).await {
-                        Ok(upgraded) => {
-                            if let Err(e) = self.tunnel(upgraded, addr).await {
-                                eprintln!("server io error: {}", e);
-                            };
-                        }
-                        Err(e) => eprintln!("upgrade error: {}", e),
-                    }
-                });
-
-                Ok(Response::new(Self::empty()))
-            } else {
-                eprintln!("CONNECT host is not socket addr: {:?}", req.uri());
-                let mut resp = Response::new(Self::full("CONNECT must be to a socket address"));
-                *resp.status_mut() = http::StatusCode::BAD_REQUEST;
-
-                Ok(resp)
-            }
-        } else {
-            let mut connector = HttpConnector::new();
-
-            match (self.ipv6_subnet, self.fallback_ipv4) {
-                (Some(v6), Some(v4)) => {
-                    let v6 = Self::get_rand_ipv6(v6.first_address().into(), v6.network_length());
-                    connector.set_local_addresses(v4, v6.into());
-                }
-                (Some(v6), None) => {
-                    let v6 = Self::get_rand_ipv6(v6.first_address().into(), v6.network_length());
-                    connector.set_local_address(Some(v6.into()));
-                }
-                (None, Some(v4)) => connector.set_local_address(Some(v4.into())),
-                _ => {}
-            }
-
-            let client = Client::builder(TokioExecutor::new())
-                .http1_title_case_headers(true)
-                .http1_preserve_header_case(true)
-                .build(connector);
-
-            let resp = client.request(req).await?;
-            Ok(resp.map(|b| b.boxed()))
-        }
-    }
-
-    fn host_addr(uri: &http::Uri) -> Option<String> {
-        uri.authority().and_then(|auth| Some(auth.to_string()))
-    }
-
-    fn empty() -> BoxBody<Bytes, hyper::Error> {
-        Empty::<Bytes>::new()
-            .map_err(|never| match never {})
-            .boxed()
-    }
-
-    fn full<T: Into<Bytes>>(chunk: T) -> BoxBody<Bytes, hyper::Error> {
-        Full::new(chunk.into())
-            .map_err(|never| match never {})
-            .boxed()
-    }
-
-    // Create a TCP connection to host:port, build a tunnel between the connection and
-    // the upgraded connection
-    async fn tunnel(self, upgraded: Upgraded, addr_str: String) -> std::io::Result<()> {
-        if let Ok(addrs) = addr_str.to_socket_addrs() {
-            for addr in addrs {
-                if let Some(v6) = self.ipv6_subnet {
-                    let socket = TcpSocket::new_v6()?;
-                    let bind_addr = Self::get_rand_ipv6_socket_addr(
-                        v6.first_address().into(),
-                        v6.network_length(),
-                    );
-                    if socket.bind(bind_addr).is_ok() {
-                        println!("{addr_str} via {bind_addr}");
-                        if let Ok(mut server) = socket.connect(addr).await {
-                            tokio::io::copy_bidirectional(&mut TokioIo::new(upgraded), &mut server)
-                                .await?;
-                            return Ok(());
-                        }
-                    }
-                } else {
-                    // Connect to remote server
-                    let mut server = TcpStream::connect(addr).await?;
-                    let mut upgraded = TokioIo::new(upgraded);
-
-                    // Proxying data
-                    let (from_client, from_server) =
-                        tokio::io::copy_bidirectional(&mut upgraded, &mut server).await?;
-
-                    // Print message when done
-                    println!(
-                        "client wrote {} bytes and received {} bytes",
-                        from_client, from_server
-                    );
-                    return Ok(());
-                }
-            }
-        } else {
-            println!("error: {addr_str}");
-        }
-
-        Ok(())
-    }
-
-    fn get_rand_ipv6_socket_addr(ipv6: u128, prefix_len: u8) -> SocketAddr {
-        let mut rng = rand::thread_rng();
-        SocketAddr::new(
-            Self::get_rand_ipv6(ipv6, prefix_len).into(),
-            rng.gen::<u16>(),
-        )
-    }
-
-    fn get_rand_ipv6(mut ipv6: u128, prefix_len: u8) -> Ipv6Addr {
-        let rand: u128 = rand::thread_rng().gen();
-        let net_part = (ipv6 >> (128 - prefix_len)) << (128 - prefix_len);
-        let host_part = (rand << prefix_len) >> prefix_len;
-        ipv6 = net_part | host_part;
-        ipv6.into()
-    }
+    Ok(())
 }

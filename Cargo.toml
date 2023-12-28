@@ -12,7 +12,6 @@ repository = "https://github.com/gngpp/vproxy"
 
 [dependencies]
 cidr = "0.2.2"
-getopts = "0.2.21"
 hyper = { version = "1.1.0", features = ["http1", "server"] }
 hyper-util = { version = "0.1.2", features = ["full"] }
 http-body-util = "0.1"
@@ -21,6 +20,9 @@ rand = "0.8.5"
 bytes = "1.5.0"
 pin-project-lite = "0.2.13"
 http = "1.0.0"
+clap = { version = "4.4.3", features = ["derive", "env"] }
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # allocator
 tcmalloc = { version = "0.3.0", optional = true }
@@ -28,13 +30,21 @@ snmalloc-rs = { version = "0.3.4", optional = true }
 rpmalloc = { version = "0.2.2", optional = true }
 jemallocator = { package = "tikv-jemallocator", version = "0.5.4", optional = true }
 mimalloc = { version = "0.1.39", default-features = false, optional = true }
+thiserror = "1.0.52"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 sysctl = "0.5.5"
 nix = { version = "0.27.1", features = ["user"] }
 
+[target.'cfg(target_family = "unix")'.dependencies]
+daemonize = "0.5.0"
+nix = { version = "0.27.1", features = ["user", "signal"]}
+
 [features]
 default = []
+http = []
+https = []
+socks5 = []
 # Enable jemalloc for binaries
 jemalloc = ["jemallocator"]
 # Enable bundled tcmalloc

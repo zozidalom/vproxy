@@ -145,7 +145,7 @@ impl HttpProxy {
     // Create a TCP connection to host:port, build a tunnel between the connection and
     // the upgraded connection
     async fn tunnel(self, upgraded: Upgraded, addr_str: String) -> std::io::Result<()> {
-        for addr in addr_str.to_socket_addrs()? {
+        if let Some(addr) = (addr_str.to_socket_addrs()?).next() {
             let (socket, bind_addr) = match (self.ipv6_subnet, self.fallback) {
                 (Some(v6), _) => {
                     let socket = TcpSocket::new_v6()?;
@@ -188,8 +188,6 @@ impl HttpProxy {
                 from_client,
                 from_server
             );
-
-            break;
         }
 
         Ok(())

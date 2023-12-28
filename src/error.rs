@@ -11,4 +11,6 @@ pub enum Error {
     NetworkParseError(#[from] cidr::errors::NetworkParseError),
     #[error("Address parse error")]
     AddressParseError(#[from] std::net::AddrParseError),
+    #[error("Self update error")]
+    SelfUpdateError(#[from] self_update::errors::Error),
 }

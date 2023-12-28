@@ -4,6 +4,7 @@ mod daemon;
 mod error;
 mod proxy;
 mod support;
+mod update;
 mod util;
 use clap::{Args, Parser, Subcommand};
 
@@ -35,6 +36,8 @@ pub enum Commands {
     /// Show the server daemon log
     #[cfg(target_family = "unix")]
     Log,
+    /// Update the application
+    Update,
 }
 
 #[derive(Args, Clone, Debug)]
@@ -107,6 +110,7 @@ fn main() -> crate::Result<()> {
         Commands::Status => daemon::status(),
         #[cfg(target_family = "unix")]
         Commands::Log => daemon::log()?,
+        Commands::Update => update::update()?,
     };
 
     Ok(())

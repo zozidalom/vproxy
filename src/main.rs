@@ -1,4 +1,5 @@
 pub mod alloc;
+#[cfg(target_family = "unix")]
 mod daemon;
 mod error;
 mod proxy;
@@ -23,12 +24,16 @@ pub enum Commands {
     /// Run server
     Run(BootArgs),
     /// Start server daemon
+    #[cfg(target_family = "unix")]
     Start(BootArgs),
     /// Stop server daemon
+    #[cfg(target_family = "unix")]
     Stop,
     /// Show the server daemon process
+    #[cfg(target_family = "unix")]
     Status,
     /// Show the server daemon log
+    #[cfg(target_family = "unix")]
     Log,
 }
 
@@ -94,9 +99,13 @@ fn main() -> crate::Result<()> {
 
     match opt.commands {
         Commands::Run(args) => proxy::run(args)?,
+        #[cfg(target_family = "unix")]
         Commands::Start(args) => daemon::start(args)?,
+        #[cfg(target_family = "unix")]
         Commands::Stop => daemon::stop()?,
+        #[cfg(target_family = "unix")]
         Commands::Status => daemon::status(),
+        #[cfg(target_family = "unix")]
         Commands::Log => daemon::log()?,
     };
 

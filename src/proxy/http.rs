@@ -211,12 +211,10 @@ impl HttpProxy {
         Ok(())
     }
 
+    /// Get a random ipv6 address
+    /// https://stackoverflow.com/questions/75276191/how-to-request-an-available-port-to-os-in-rust
     fn get_rand_ipv6_socket_addr(ipv6: u128, prefix_len: u8) -> SocketAddr {
-        let mut rng = rand::thread_rng();
-        SocketAddr::new(
-            Self::get_rand_ipv6(ipv6, prefix_len).into(),
-            rng.gen::<u16>(),
-        )
+        SocketAddr::new(Self::get_rand_ipv6(ipv6, prefix_len).into(), 0)
     }
 
     fn get_rand_ipv6(mut ipv6: u128, prefix_len: u8) -> Ipv6Addr {

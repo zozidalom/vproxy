@@ -1,6 +1,56 @@
+[![CI](https://github.com/gngpp/vproxy/actions/workflows/ci.yml/badge.svg)](https://github.com/gngpp/vproxy/actions/workflows/ci.yml)
+[![CI](https://github.com/gngpp/vproxy/actions/workflows/release.yml/badge.svg)](https://github.com/gngpp/vproxy/actions/workflows/release.yml)
+ <a target="_blank" href="https://github.com/gngpp/vproxy/blob/main/LICENSE">
+  <img src="https://img.shields.io/badge/license-MIT-blue.svg"/>
+ </a>
+  <a href="https://github.com/gngpp/vproxy/releases">
+    <img src="https://img.shields.io/github/release/gngpp/vproxy.svg?style=flat">
+  </a>
+  </a><a href="https://github.com/gngpp/vproxy/releases">
+    <img src="https://img.shields.io/github/downloads/gngpp/vproxy/total?style=flat">
+  </a>
+
+
 # vproxy
 
 Make the request using a random IPv6 address within the IPv6 subnet
+
+### Usage
+
+Taking [tunnelbroker](https://tunnelbroker.net/) / `Debian10` as an example, make sure your server supports `IPv6` and has configured the tunnel
+
+> If you run the program with sudo, it will automatically configure sysctl net.ipv6.ip_nonlocal_bind=1 and ip route add local 2001:470:e953::/48 dev lo for you. If you do not run it with sudo, you will need to configure these manually.
+
+```shell
+sysctl net.ipv6.ip_nonlocal_bind=1
+
+# Replace your IPv6 subnet
+ip route add local 2001:470:e953::/48 dev lo
+
+# Run
+vproxy run -i 2001:470:e953::/48
+
+# Start Daemon (Run in the background), must use sudo
+vproxy start -i 2001:470:e953::/48
+
+# Stop Daemon, must use sudo
+vproxy stop
+
+# Show Daemon log
+vproxy log
+
+# Show Daemon status
+vproxy status
+
+while true; do curl -x http://127.0.0.1:8100 -s https://api.ip.sb/ip -A Mozilla; done
+...
+2001:470:e953:5b75:c862:3328:3e8f:f4d1
+2001:470:e953:b84d:ad7d:7399:ade5:4c1c
+2001:470:e953:4f88:d5ca:84:83fd:6faa
+2001:470:e953:29f3:41e2:d3f2:4a49:1f22
+2001:470:e953:98f6:cb40:9dfd:c7ab:18c4
+2001:470:e953:f1d7:eb68:cc59:b2d0:2c6f
+```
 
 ### Command Manual
 
@@ -54,43 +104,6 @@ Options:
   -f, --fallback <FALLBACK>        Fallback address
   -t, --typed <TYPED>              Proxy type, e.g. http, https, socks5 [default: http]
   -h, --help                       Print help
-```
-
-### Usage
-
-Taking [tunnelbroker](https://tunnelbroker.net/) / `Debian10` as an example, make sure your server supports `IPv6` and has configured the tunnel
-
-> If you run the program with sudo, it will automatically configure sysctl net.ipv6.ip_nonlocal_bind=1 and ip route add local 2001:470:e953::/48 dev lo for you. If you do not run it with sudo, you will need to configure these manually.
-
-```shell
-sysctl net.ipv6.ip_nonlocal_bind=1
-
-# Replace your IPv6 subnet
-ip route add local 2001:470:e953::/48 dev lo
-
-# Run
-vproxy run -i 2001:470:e953::/48
-
-# Start Daemon (Run in the background), must use sudo
-vproxy start -i 2001:470:e953::/48
-
-# Stop Daemon, must use sudo
-vproxy stop
-
-# Show Daemon log
-vproxy log
-
-# Show Daemon status
-vproxy status
-
-while true; do curl -x http://127.0.0.1:8100 -s https://api.ip.sb/ip -A Mozilla; done
-...
-2001:470:e953:5b75:c862:3328:3e8f:f4d1
-2001:470:e953:b84d:ad7d:7399:ade5:4c1c
-2001:470:e953:4f88:d5ca:84:83fd:6faa
-2001:470:e953:29f3:41e2:d3f2:4a49:1f22
-2001:470:e953:98f6:cb40:9dfd:c7ab:18c4
-2001:470:e953:f1d7:eb68:cc59:b2d0:2c6f
 ```
 
 ### Compile

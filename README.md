@@ -42,6 +42,9 @@ vproxy log
 # Show Daemon status
 vproxy status
 
+# Online Update
+vproxy update
+
 while true; do curl -x http://127.0.0.1:8100 -s https://api.ip.sb/ip -A Mozilla; done
 ...
 2001:470:e953:5b75:c862:3328:3e8f:f4d1
@@ -82,6 +85,7 @@ Commands:
   stop    Stop server daemon
   status  Show the server daemon process
   log     Show the server daemon log
+  update  Update the application
   help    Print this message or the help of the given subcommand(s)
 
 Options:

@@ -2,28 +2,6 @@
 
 Make the request using a random IPv6 address within the IPv6 subnet
 
-### Usage
-
-Taking [tunnelbroker](https://tunnelbroker.net/) / `Debian10` as an example, make sure your server supports `IPv6` and has configured the tunnel
-
-```shell
-sysctl net.ipv6.ip_nonlocal_bind=1
-
-# Replace your IPv6 subnet
-ip route add local 2001:470:e953::/48 dev lo
-
-nohup vproxy -i 2001:470:e953::/48 &
-
-while true; do curl -x http://127.0.0.1:8100 -s https://api.ip.sb/ip -A Mozilla; done
-...
-2001:470:e953:5b75:c862:3328:3e8f:f4d1
-2001:470:e953:b84d:ad7d:7399:ade5:4c1c
-2001:470:e953:4f88:d5ca:84:83fd:6faa
-2001:470:e953:29f3:41e2:d3f2:4a49:1f22
-2001:470:e953:98f6:cb40:9dfd:c7ab:18c4
-2001:470:e953:f1d7:eb68:cc59:b2d0:2c6f
-```
-
 ### Command Manual
 
 ##### Description
@@ -33,18 +11,86 @@ while true; do curl -x http://127.0.0.1:8100 -s https://api.ip.sb/ip -A Mozilla;
 - `--bind`, Http service listening address, default 0.0.0.0:8100
 - `--fallback`, The binding address used when IPv6 access is unreachable, must be ipv4
 - `--ipv6-subnet`, IPv6 subnet
+- `--typed`, Proxy type, e.g. http, https, socks5
+- `--auth-user`, Basic auth username
+- `--auth-pass`, Basic auth password
+- `--tls-cert`, TLS certificate file
+- `--tls-key`, TLS private key file
+
+> The functionalities of the parameters --typed, --auth-user, --auth-pass, --tls-cert, --tls-key have not been implemented yet.
 
 ```shell
 $ vproxy -h
-Random IPv6 request proxy
+Random IPv6 request proxy (Fallback Ipv4)
 
-Usage: vproxy [options]
+Usage: vproxy
+       vproxy <COMMAND>
+
+Commands:
+  run     Run server
+  start   Start server daemon
+  stop    Stop server daemon
+  status  Show the server daemon process
+  log     Show the server daemon log
+  help    Print this message or the help of the given subcommand(s)
 
 Options:
-    -b, --bind          Proxy bind address
-    -f, --fallback      Fallback ipv4
-    -i, --ipv6-subnet   IPv6 Subnet: 2001:db8::/32
-    -h, --help          print this help menu
+  -h, --help     Print help
+  -V, --version  Print version
+
+$ vproxy run -h
+Run server
+
+Usage: vproxy run [OPTIONS]
+
+Options:
+  -L, --debug                      Debug mode [env: VPROXY_DEBUG=]
+  -B, --bind <BIND>                Bind address [default: 0.0.0.0:8100]
+  -u, --auth-user <AUTH_USER>      Basic auth username
+  -p, --auth-pass <AUTH_PASS>      Basic auth password
+  -C, --tls-cert <TLS_CERT>        TLS certificate file
+  -K, --tls-key <TLS_KEY>          TLS private key file
+  -i, --ipv6-subnet <IPV6_SUBNET>  Ipv6 subnet, e.g. 2001:db8::/32
+  -f, --fallback <FALLBACK>        Fallback address
+  -t, --typed <TYPED>              Proxy type, e.g. http, https, socks5 [default: http]
+  -h, --help                       Print help
+```
+
+### Usage
+
+Taking [tunnelbroker](https://tunnelbroker.net/) / `Debian10` as an example, make sure your server supports `IPv6` and has configured the tunnel
+
+> If you run the program with sudo, it will automatically configure sysctl net.ipv6.ip_nonlocal_bind=1 and ip route add local 2001:470:e953::/48 dev lo for you. If you do not run it with sudo, you will need to configure these manually.
+
+```shell
+sysctl net.ipv6.ip_nonlocal_bind=1
+
+# Replace your IPv6 subnet
+ip route add local 2001:470:e953::/48 dev lo
+
+# Run
+vproxy run -i 2001:470:e953::/48
+
+# Start Daemon (Run in the background), must use sudo
+vproxy start -i 2001:470:e953::/48
+
+# Stop Daemon, must use sudo
+vproxy stop
+
+# Show Daemon log
+vproxy log
+
+# Show Daemon status
+vproxy status
+
+while true; do curl -x http://127.0.0.1:8100 -s https://api.ip.sb/ip -A Mozilla; done
+...
+2001:470:e953:5b75:c862:3328:3e8f:f4d1
+2001:470:e953:b84d:ad7d:7399:ade5:4c1c
+2001:470:e953:4f88:d5ca:84:83fd:6faa
+2001:470:e953:29f3:41e2:d3f2:4a49:1f22
+2001:470:e953:98f6:cb40:9dfd:c7ab:18c4
+2001:470:e953:f1d7:eb68:cc59:b2d0:2c6f
 ```
 
 ### Compile
@@ -64,6 +110,6 @@ If you would like to submit your contribution, please open a [Pull Request](http
 
 Your question might already be answered on the [issues](https://github.com/gngpp/vproxy/issues)
 
-## Author
+### License
 
 **vproxy** © [gngpp](https://github.com/gngpp), Released under the [MIT](./LICENSE) License.

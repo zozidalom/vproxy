@@ -105,7 +105,7 @@ impl HttpProxy {
             match (self.ipv6_subnet, self.fallback) {
                 (Some(v6), Some(IpAddr::V4(v4))) => {
                     let v6 = Self::get_rand_ipv6(v6.first_address().into(), v6.network_length());
-                    connector.set_local_addresses(v4, v6.into());
+                    connector.set_local_addresses(v4, v6);
                 }
                 (Some(v6), None) => {
                     let v6 = Self::get_rand_ipv6(v6.first_address().into(), v6.network_length());
@@ -127,7 +127,7 @@ impl HttpProxy {
     }
 
     fn host_addr(uri: &http::Uri) -> Option<String> {
-        uri.authority().and_then(|auth| Some(auth.to_string()))
+        uri.authority().map(|auth| auth.to_string())
     }
 
     fn empty() -> BoxBody<Bytes, hyper::Error> {
@@ -173,7 +173,7 @@ impl HttpProxy {
             };
 
             // Bind to local address
-            let _ = socket.bind(bind_addr)?;
+            socket.bind(bind_addr)?;
 
             tracing::info!("Tunnel: {} via {}", addr_str, bind_addr);
             let mut server = socket.connect(addr).await?;

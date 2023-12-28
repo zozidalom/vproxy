@@ -147,19 +147,20 @@ impl HttpProxy {
     async fn tunnel(&self, upgraded: Upgraded, addr_str: String) -> std::io::Result<()> {
         for addr in addr_str.to_socket_addrs()? {
             if let Some((socket, bind_addr)) = self.get_socket_and_bind_addr() {
-                if socket.bind(bind_addr).is_ok() {
-                    if let Ok(mut server) = socket.connect(addr).await {
-                        tracing::info!("tunnel: {} via {}", addr_str, server.local_addr()?);
-                        Self::tunnel_proxy(upgraded, &mut server).await?;
-                        return Ok(());
-                    }
+                // If we have a bind address, bind the socket to it
+                socket.bind(bind_addr)?;
+                if let Ok(mut server) = socket.connect(addr).await {
+                    tracing::info!("tunnel: {} via {}", addr_str, server.local_addr()?);
+                    return Self::tunnel_proxy(upgraded, &mut server).await;
                 }
             } else if let Ok(mut server) = TcpStream::connect(addr).await {
                 tracing::info!("tunnel: {} via {}", addr_str, server.local_addr()?);
-                Self::tunnel_proxy(upgraded, &mut server).await?;
-                return Ok(());
+                return Self::tunnel_proxy(upgraded, &mut server).await;
             }
         }
+
+        // All attempts failed
+        tracing::warn!("tunnel: {} failed", addr_str);
 
         Ok(())
     }

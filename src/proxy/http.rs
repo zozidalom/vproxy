@@ -63,7 +63,7 @@ impl HttpProxy {
         Response<BoxBody<Bytes, hyper::Error>>,
         Box<dyn std::error::Error + Send + Sync + 'static>,
     > {
-        tracing::info!("{req:?}");
+        tracing::info!("request: {req:?}");
 
         if Method::CONNECT == req.method() {
             // Received an HTTP request like:
@@ -146,16 +146,14 @@ impl HttpProxy {
     // the upgraded connection
     async fn tunnel(&self, upgraded: Upgraded, addr_str: String) -> std::io::Result<()> {
         for addr in addr_str.to_socket_addrs()? {
-            if let Some((socket, bind_addr)) = self.get_socket_and_bind_addr() {
-                // If we have a bind address, bind the socket to it
-                socket.bind(bind_addr)?;
-                if let Ok(mut server) = socket.connect(addr).await {
+            match self.try_connect(addr).await {
+                Ok(mut server) => {
                     tracing::info!("tunnel: {} via {}", addr_str, server.local_addr()?);
                     return Self::tunnel_proxy(upgraded, &mut server).await;
                 }
-            } else if let Ok(mut server) = TcpStream::connect(addr).await {
-                tracing::info!("tunnel: {} via {}", addr_str, server.local_addr()?);
-                return Self::tunnel_proxy(upgraded, &mut server).await;
+                Err(err) => {
+                    tracing::debug!("try connect: {} failed: {}", addr_str, err);
+                }
             }
         }
 
@@ -166,27 +164,30 @@ impl HttpProxy {
     }
 
     /// Get a socket and a bind address
-    fn get_socket_and_bind_addr(self) -> Option<(TcpSocket, SocketAddr)> {
+    async fn try_connect(self, addr: SocketAddr) -> std::io::Result<TcpStream> {
         match (self.ipv6_subnet, self.fallback) {
             (Some(v6), _) => {
-                let socket = TcpSocket::new_v6().ok()?;
+                let socket = TcpSocket::new_v6()?;
                 let bind_addr = SocketAddr::new(
                     Self::get_rand_ipv6(v6.first_address().into(), v6.network_length()).into(),
                     0,
                 );
-                Some((socket, bind_addr))
+                socket.bind(bind_addr)?;
+                Ok(socket.connect(bind_addr).await?)
             }
             (_, Some(IpAddr::V4(v4))) => {
-                let socket = TcpSocket::new_v4().ok()?;
+                let socket = TcpSocket::new_v4()?;
                 let bind_addr = SocketAddr::new(IpAddr::V4(v4), 0);
-                Some((socket, bind_addr))
+                socket.bind(bind_addr)?;
+                Ok(socket.connect(bind_addr).await?)
             }
             (_, Some(IpAddr::V6(v6))) => {
-                let socket = TcpSocket::new_v6().ok()?;
+                let socket = TcpSocket::new_v6()?;
                 let bind_addr = SocketAddr::new(IpAddr::V6(v6), 0);
-                Some((socket, bind_addr))
+                socket.bind(bind_addr)?;
+                Ok(socket.connect(bind_addr).await?)
             }
-            _ => None,
+            _ => Ok(TcpStream::connect(addr).await?),
         }
     }
 

@@ -99,6 +99,13 @@ pub fn stop() -> crate::Result<()> {
     Ok(())
 }
 
+/// Restart the daemon
+#[cfg(target_family = "unix")]
+pub fn restart(args: BootArgs) -> crate::Result<()> {
+    stop()?;
+    start(args)
+}
+
 /// Show the status of the daemon
 #[cfg(target_family = "unix")]
 pub fn status() {

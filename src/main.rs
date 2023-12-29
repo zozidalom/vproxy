@@ -6,8 +6,8 @@ mod proxy;
 mod support;
 mod update;
 mod util;
-use clap::{Args, Parser, Subcommand};
 
+use clap::{Args, Parser, Subcommand};
 use std::{net::SocketAddr, path::PathBuf};
 
 type Result<T, E = error::Error> = std::result::Result<T, E>;
@@ -30,6 +30,9 @@ pub enum Commands {
     /// Stop server daemon
     #[cfg(target_family = "unix")]
     Stop,
+    /// Restart server daemon
+    #[cfg(target_family = "unix")]
+    Restart(BootArgs),
     /// Show the server daemon process
     #[cfg(target_family = "unix")]
     Status,
@@ -106,6 +109,8 @@ fn main() -> crate::Result<()> {
         Commands::Start(args) => daemon::start(args)?,
         #[cfg(target_family = "unix")]
         Commands::Stop => daemon::stop()?,
+        #[cfg(target_family = "unix")]
+        Commands::Restart(args) => daemon::restart(args)?,
         #[cfg(target_family = "unix")]
         Commands::Status => daemon::status(),
         #[cfg(target_family = "unix")]

@@ -173,21 +173,21 @@ impl HttpProxy {
                     0,
                 );
                 socket.bind(bind_addr)?;
-                Ok(socket.connect(bind_addr).await?)
+                socket.connect(addr).await
             }
             (_, Some(IpAddr::V4(v4))) => {
                 let socket = TcpSocket::new_v4()?;
                 let bind_addr = SocketAddr::new(IpAddr::V4(v4), 0);
                 socket.bind(bind_addr)?;
-                Ok(socket.connect(bind_addr).await?)
+                socket.connect(addr).await
             }
             (_, Some(IpAddr::V6(v6))) => {
                 let socket = TcpSocket::new_v6()?;
                 let bind_addr = SocketAddr::new(IpAddr::V6(v6), 0);
                 socket.bind(bind_addr)?;
-                Ok(socket.connect(bind_addr).await?)
+                socket.connect(addr).await
             }
-            _ => Ok(TcpStream::connect(addr).await?),
+            _ => TcpStream::connect(addr).await,
         }
     }
 

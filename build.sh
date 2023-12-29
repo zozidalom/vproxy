@@ -35,7 +35,6 @@ linux_target=(
   "x86_64-unknown-linux-musl:mimalloc"
   "aarch64-unknown-linux-musl:mimalloc"
   "armv7-unknown-linux-musleabihf:mimalloc"
-  "armv7-unknown-linux-musleabi:jemalloc"
   "arm-unknown-linux-musleabihf:jemalloc"
   "i686-unknown-linux-musl:jemalloc"
   "i586-unknown-linux-musl:jemalloc"

@@ -167,8 +167,10 @@ impl HttpProxy {
     /// Get a socket and a bind address
     async fn try_connect(self, addr: SocketAddr) -> std::io::Result<TcpStream> {
         match (self.ipv6_subnet, self.fallback) {
-            (Some(v6), Some(ip)) => self.try_connect_with_ipv6_and_fallback(addr, v6, ip).await,
-            (Some(v6), None) => self.try_connect_with_ipv6(addr, v6).await,
+            (Some(ipv6_cidr), ip_addr) => {
+                self.try_connect_with_ipv6_and_fallback(addr, ipv6_cidr, ip_addr)
+                    .await
+            }
             (None, Some(ip)) => self.try_connect_with_fallback(addr, ip).await,
             _ => TcpStream::connect(addr).await,
         }
@@ -179,7 +181,7 @@ impl HttpProxy {
         self,
         addr: SocketAddr,
         v6: Ipv6Cidr,
-        ip: IpAddr,
+        ip: Option<IpAddr>,
     ) -> std::io::Result<TcpStream> {
         let socket = TcpSocket::new_v6()?;
         let bind_addr = SocketAddr::new(
@@ -193,35 +195,16 @@ impl HttpProxy {
             Ok(first) => Ok(first),
             Err(err) => {
                 tracing::debug!("try connect with ipv6 failed: {}", err);
-                // Try to connect with fallback ip (ipv4 or ipv6)
-                let socket = self.create_socket_for_ip(ip)?;
-                let bind_addr = SocketAddr::new(ip, 0);
-                socket.bind(bind_addr)?;
-                socket.connect(addr).await
-            }
-        }
-    }
-
-    /// Try to connect with ipv6
-    async fn try_connect_with_ipv6(
-        self,
-        addr: SocketAddr,
-        v6: Ipv6Cidr,
-    ) -> std::io::Result<TcpStream> {
-        let socket = TcpSocket::new_v6()?;
-        let bind_addr = SocketAddr::new(
-            Self::get_rand_ipv6(v6.first_address().into(), v6.network_length()).into(),
-            0,
-        );
-        socket.bind(bind_addr)?;
-
-        // Try to connect with ipv6
-        match socket.connect(addr).await {
-            Ok(first) => Ok(first),
-            Err(err) => {
-                tracing::debug!("try connect with ipv6 failed: {}", err);
-                // Try to connect with system default ip
-                TcpStream::connect(addr).await
+                if let Some(ip) = ip {
+                    // Try to connect with fallback ip (ipv4 or ipv6)
+                    let socket = self.create_socket_for_ip(ip)?;
+                    let bind_addr = SocketAddr::new(ip, 0);
+                    socket.bind(bind_addr)?;
+                    socket.connect(addr).await
+                } else {
+                    // Try to connect with system default ip
+                    TcpStream::connect(addr).await
+                }
             }
         }
     }

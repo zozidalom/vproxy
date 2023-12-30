@@ -33,6 +33,9 @@ vproxy run -i 2001:470:e953::/48
 # Start Daemon (Run in the background), must use sudo
 vproxy start -i 2001:470:e953::/48
 
+# Restart Daemon, must use sudo
+vproxy restart
+
 # Stop Daemon, must use sudo
 vproxy stop
 
@@ -83,6 +86,7 @@ Commands:
   run     Run server
   start   Start server daemon
   stop    Stop server daemon
+  restart Restart server daemon
   status  Show the server daemon process
   log     Show the server daemon log
   update  Update the application

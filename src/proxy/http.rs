@@ -1,9 +1,9 @@
-use crate::support::TokioIo;
 use crate::BootArgs;
 use cidr::Ipv6Cidr;
 use hyper_util::client::legacy::connect::HttpConnector;
 use hyper_util::client::legacy::Client;
 use hyper_util::rt::TokioExecutor;
+use hyper_util::rt::TokioIo;
 use rand::Rng;
 
 use std::net::{IpAddr, Ipv6Addr, SocketAddr, ToSocketAddrs};

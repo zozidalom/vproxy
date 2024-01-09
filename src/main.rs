@@ -3,7 +3,6 @@ pub mod alloc;
 mod daemon;
 mod error;
 mod proxy;
-mod support;
 mod update;
 mod util;
 

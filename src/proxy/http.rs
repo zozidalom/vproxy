@@ -1,3 +1,4 @@
+use crate::proxy::auth;
 use crate::BootArgs;
 use cidr::Ipv6Cidr;
 use hyper_util::client::legacy::connect::HttpConnector;
@@ -17,6 +18,8 @@ use hyper::upgrade::Upgraded;
 use hyper::{Method, Request, Response};
 
 use tokio::net::{TcpListener, TcpSocket, TcpStream};
+
+use super::error::ProxyError;
 
 pub(super) async fn run(args: BootArgs) -> crate::Result<()> {
     tracing::info!("Listening on http://{}", args.bind);
@@ -60,11 +63,11 @@ impl HttpProxy {
     async fn proxy(
         self,
         req: Request<hyper::body::Incoming>,
-    ) -> Result<
-        Response<BoxBody<Bytes, hyper::Error>>,
-        Box<dyn std::error::Error + Send + Sync + 'static>,
-    > {
+    ) -> Result<Response<BoxBody<Bytes, hyper::Error>>, ProxyError> {
         tracing::info!("request: {req:?}");
+
+        // Check basic auth
+        auth::valid_basic_auth(req.headers())?;
 
         if Method::CONNECT == req.method() {
             // Received an HTTP request like:
@@ -117,13 +120,14 @@ impl HttpProxy {
                 _ => {}
             }
 
-            let client = Client::builder(TokioExecutor::new())
+            let resp = Client::builder(TokioExecutor::new())
                 .http1_title_case_headers(true)
                 .http1_preserve_header_case(true)
-                .build(connector);
+                .build(connector)
+                .request(req)
+                .await?;
 
-            let resp = client.request(req).await?.map(|b| b.boxed());
-            Ok(resp)
+            Ok(resp.map(|b| b.boxed()))
         }
     }
 

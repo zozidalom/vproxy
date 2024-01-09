@@ -26,12 +26,12 @@ pub enum Commands {
     /// Start server daemon
     #[cfg(target_family = "unix")]
     Start(BootArgs),
-    /// Stop server daemon
-    #[cfg(target_family = "unix")]
-    Stop,
     /// Restart server daemon
     #[cfg(target_family = "unix")]
     Restart(BootArgs),
+    /// Stop server daemon
+    #[cfg(target_family = "unix")]
+    Stop,
     /// Show the server daemon process
     #[cfg(target_family = "unix")]
     Status,
@@ -107,9 +107,9 @@ fn main() -> crate::Result<()> {
         #[cfg(target_family = "unix")]
         Commands::Start(args) => daemon::start(args)?,
         #[cfg(target_family = "unix")]
-        Commands::Stop => daemon::stop()?,
-        #[cfg(target_family = "unix")]
         Commands::Restart(args) => daemon::restart(args)?,
+        #[cfg(target_family = "unix")]
+        Commands::Stop => daemon::stop()?,
         #[cfg(target_family = "unix")]
         Commands::Status => daemon::status(),
         #[cfg(target_family = "unix")]

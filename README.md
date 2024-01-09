@@ -65,7 +65,7 @@ while true; do curl -x http://127.0.0.1:8100 -s https://api.ip.sb/ip -A Mozilla;
 > If no subnet is configured, the local default network proxy request will be used. When the local machine sets the priority `Ipv4`/`Ipv6` and the priority is `Ipv4`, it will always use `Ipv4` to make requests (if any).
 
 - `--bind`, Http service listening address, default 0.0.0.0:8100
-- `--fallback`, The binding address used when IPv6 access is unreachable, must be ipv4
+- `--fallback`, The binding address used when IPv6 access is unreachable
 - `--ipv6-subnet`, IPv6 subnet
 - `--typed`, Proxy type, e.g. http, https, socks5
 - `--auth-user`, Basic auth username
@@ -73,11 +73,11 @@ while true; do curl -x http://127.0.0.1:8100 -s https://api.ip.sb/ip -A Mozilla;
 - `--tls-cert`, TLS certificate file
 - `--tls-key`, TLS private key file
 
-> The functionalities of the parameters --typed, --auth-user, --auth-pass, --tls-cert, --tls-key have not been implemented yet.
+> The functionalities of the parameters --typed, --tls-cert, --tls-key have not been implemented yet.
 
 ```shell
 $ vproxy -h
-Random IPv6 request proxy (Fallback Ipv4)
+Random IPv6 request proxy
 
 Usage: vproxy
        vproxy <COMMAND>
@@ -85,8 +85,8 @@ Usage: vproxy
 Commands:
   run     Run server
   start   Start server daemon
-  stop    Stop server daemon
   restart Restart server daemon
+  stop    Stop server daemon
   status  Show the server daemon process
   log     Show the server daemon log
   update  Update the application

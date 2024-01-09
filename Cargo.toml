@@ -24,7 +24,7 @@ pin-project-lite = "0.2.13"
 http = "1.0.0"
 clap = { version = "4.4.3", features = ["derive", "env"] }
 tracing = "0.1.40"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 self_update = { version = "0.39.0", default-features = false, features = ["rustls", "archive-tar", "compression-flate2"]  }
 
 # allocator
@@ -36,7 +36,6 @@ mimalloc = { version = "0.1.39", default-features = false, optional = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 sysctl = "0.5.5"
-nix = { version = "0.27.1", features = ["user"] }
 
 [target.'cfg(target_family = "unix")'.dependencies]
 daemonize = "0.5.0"

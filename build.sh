@@ -138,6 +138,7 @@ compress_and_move() {
   if [[ $build_target == *windows* ]]; then
     bin_name="${name}.exe"
   fi
+  upx "${target_dir}/${bin_name}"
   sudo chmod +x "${target_dir}/${bin_name}"
   cd "${target_dir}"
   tar czvf $name-$tag-${build_target}.tar.gz $bin_name

@@ -1,14 +1,11 @@
+mod auth;
+mod error;
 mod http;
 mod https;
 mod socks5;
 
-use tokio::sync::OnceCell;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-
 use crate::BootArgs;
-
-/// Basic auth realm
-static BASIC_AUTH_REALM: OnceCell<Option<(String, String)>> = OnceCell::const_new();
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main(flavor = "multi_thread")]
 pub async fn run(args: BootArgs) -> crate::Result<()> {
@@ -26,12 +23,8 @@ pub async fn run(args: BootArgs) -> crate::Result<()> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    // Set basic auth realm
-    if let (Some(u), Some(p)) = (&args.auth_user, &args.auth_pass) {
-        BASIC_AUTH_REALM
-            .set(Some((u.to_owned(), p.to_owned())))
-            .expect("BASIC_AUTH_REALM should be set only once")
-    }
+    // Init basic auth realm
+    auth::init_basic_auth_realm(&args);
 
     // Auto set sysctl
     #[cfg(target_os = "linux")]

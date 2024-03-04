@@ -11,7 +11,7 @@ repository = "https://github.com/gngpp/vproxy"
 
 
 [dependencies]
-base64 = "0.21.6"
+base64 = "0.22.0"
 cidr = "0.2.2"
 thiserror = "1.0.56"
 hyper = { version = "1.1.0", features = ["http1", "server"] }

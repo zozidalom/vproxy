@@ -25,7 +25,7 @@ pub async fn run(args: BootArgs) -> crate::Result<()> {
     let listener = TcpListener::bind(args.bind).await?;
     let http_proxy = Arc::new(HttpProxy::new(args));
     // Limit to 100 concurrent tasks
-    let sem = Arc::new(Semaphore::new(100)); 
+    let sem = Arc::new(Semaphore::new(100));
 
     loop {
         let (stream, _) = listener.accept().await?;

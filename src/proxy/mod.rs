@@ -3,8 +3,9 @@ mod error;
 mod http;
 mod socks5;
 
-use crate::BootArgs;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
+use crate::BootArgs;
 
 #[tokio::main(flavor = "multi_thread")]
 pub async fn run(args: BootArgs) -> crate::Result<()> {

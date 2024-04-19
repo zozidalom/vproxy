@@ -6,8 +6,9 @@ mod proxy;
 mod update;
 mod util;
 
-use clap::{Args, Parser, Subcommand};
 use std::net::SocketAddr;
+
+use clap::{Args, Parser, Subcommand};
 
 type Result<T, E = error::Error> = std::result::Result<T, E>;
 
@@ -75,6 +76,7 @@ pub enum ProxyType {
 
 impl std::str::FromStr for ProxyType {
     type Err = String;
+
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "http" => Ok(Self::Http),
@@ -86,11 +88,9 @@ impl std::str::FromStr for ProxyType {
 
 // To try this example:
 // 1. cargo run --example http_proxy
-// 2. config http_proxy in command line
-//    $ export http_proxy=http://127.0.0.1:8100
+// 2. config http_proxy in command line $ export http_proxy=http://127.0.0.1:8100
 //    $ export https_proxy=http://127.0.0.1:8100
-// 3. send requests
-//    $ curl -i https://www.some_domain.com/
+// 3. send requests $ curl -i https://www.some_domain.com/
 fn main() -> crate::Result<()> {
     let opt = Opt::parse();
 

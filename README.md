@@ -1,15 +1,14 @@
 [![CI](https://github.com/gngpp/vproxy/actions/workflows/ci.yml/badge.svg)](https://github.com/gngpp/vproxy/actions/workflows/ci.yml)
 [![CI](https://github.com/gngpp/vproxy/actions/workflows/release.yml/badge.svg)](https://github.com/gngpp/vproxy/actions/workflows/release.yml)
- <a target="_blank" href="https://github.com/gngpp/vproxy/blob/main/LICENSE">
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg"/>
- </a>
-  <a href="https://github.com/gngpp/vproxy/releases">
-    <img src="https://img.shields.io/github/release/gngpp/vproxy.svg?style=flat">
-  </a>
-  </a><a href="https://github.com/gngpp/vproxy/releases">
-    <img src="https://img.shields.io/github/downloads/gngpp/vproxy/total?style=flat">
-  </a>
-
+<a target="_blank" href="https://github.com/gngpp/vproxy/blob/main/LICENSE">
+<img src="https://img.shields.io/badge/license-MIT-blue.svg"/>
+</a>
+<a href="https://github.com/gngpp/vproxy/releases">
+<img src="https://img.shields.io/github/release/gngpp/vproxy.svg?style=flat">
+</a>
+</a><a href="https://github.com/gngpp/vproxy/releases">
+<img src="https://img.shields.io/github/downloads/gngpp/vproxy/total?style=flat">
+</a>
 
 # vproxy
 
@@ -70,8 +69,6 @@ while true; do curl -x http://127.0.0.1:8100 -s https://api.ip.sb/ip -A Mozilla;
 - `--typed`, Proxy type, e.g. http, https, socks5
 - `--auth-user`, Basic auth username
 - `--auth-pass`, Basic auth password
-- `--tls-cert`, TLS certificate file
-- `--tls-key`, TLS private key file
 
 > The functionalities of the parameters --typed, --tls-cert, --tls-key have not been implemented yet.
 

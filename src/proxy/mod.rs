@@ -42,9 +42,9 @@ pub async fn run(args: BootArgs) -> crate::Result<()> {
 
     // Auto set sysctl
     #[cfg(target_os = "linux")]
-    args.ipv6_subnet.map(|v6| {
+    args.cidr.map(|v6| {
         crate::util::sysctl_ipv6_no_local_bind();
-        crate::util::sysctl_route_add_ipv6_subnet(&v6);
+        crate::util::sysctl_route_add_cidr(&v6);
     });
 
     // Init ip whitelist

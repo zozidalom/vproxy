@@ -1,6 +1,6 @@
 #[cfg(target_os = "linux")]
 /// Try to add a route to the given subnet to the loopback interface.
-pub(crate) fn sysctl_route_add_ipv6_subnet(subnet: &cidr::Ipv6Cidr) {
+pub(crate) fn sysctl_route_add_cidr(subnet: &cidr::Ipv6Cidr) {
     if !nix::unistd::Uid::effective().is_root() {
         return;
     }

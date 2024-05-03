@@ -1,6 +1,6 @@
 [package]
 name = "vproxy"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 authors = ["gngppz@gmail.com"]
 description = "An easy and powerful Rust HTTP/Socks5 Proxy"

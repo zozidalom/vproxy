@@ -1,9 +1,9 @@
 [package]
 name = "vproxy"
-version = "0.1.7"
+version = "0.2.0"
 edition = "2021"
 authors = ["gngppz@gmail.com"]
-description = "Random IPv6 request proxy"
+description = "An easy and powerful Rust HTTP/Socks5 Proxy"
 readme = "README.md"
 license = "MIT"
 homepage = "https://github.com/gngpp/vproxy"
@@ -61,15 +61,10 @@ default = []
 http = []
 https = []
 socks5 = []
-# Enable jemalloc for binaries
 jemalloc = ["jemallocator"]
-# Enable bundled tcmalloc
 tcmalloc = ["tcmalloc/bundled"]
-# Enable snmalloc for binaries
 snmalloc = ["snmalloc-rs"]
-# Enable bundled rpmalloc
 rpmalloc = ["dep:rpmalloc"]
-# Enable mimalloc for binaries
 mimalloc = ["dep:mimalloc"]
 
 [profile.release]

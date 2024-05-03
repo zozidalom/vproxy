@@ -55,13 +55,13 @@ pub struct AuthMode {
 
 #[derive(Subcommand, Clone)]
 pub enum Proxy {
-    /// Http proxy
+    /// Http server
     Http {
         /// Authentication type
         #[clap(flatten)]
         auth: AuthMode,
     },
-    /// Socks5 proxy
+    /// Socks5 server
     Socks5 {
         /// Authentication type
         #[clap(flatten)]

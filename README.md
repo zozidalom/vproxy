@@ -1,7 +1,7 @@
 [![CI](https://github.com/gngpp/vproxy/actions/workflows/ci.yml/badge.svg)](https://github.com/gngpp/vproxy/actions/workflows/ci.yml)
 [![CI](https://github.com/gngpp/vproxy/actions/workflows/release.yml/badge.svg)](https://github.com/gngpp/vproxy/actions/workflows/release.yml)
 <a target="_blank" href="https://github.com/gngpp/vproxy/blob/main/LICENSE">
-<img src="https://img.shields.io/badge/license-MIT-blue.svg"/>
+<img src="https://img.shields.io/badge/GPL-3.0-blue.svg"/>
 </a>
 <a href="https://github.com/gngpp/vproxy/releases">
 <img src="https://img.shields.io/github/release/gngpp/vproxy.svg?style=flat">
@@ -12,15 +12,13 @@
 
 # vproxy
 
-IPv6 subnet address proxy that sends out random IPv6 requests
+An easy and powerful Rust HTTP/Socks5 proxy that allows initiating network requests using IP binding calculated from CIDR addresses.
 
 ### Features
 
-- Local proxy fallback
 - IPv4/IPv6 priority
-- HTTP service bind address
-- Specify IPv6 subnet
-- Fallback address for IPv6 unreachability
+- Service binding `IPv6-CIDR` address
+- Fallback address when `Ipv6-CIDR` address is unreachable
 - Basic authentication
 - IP whitelist
 - Proxy support (HTTP, SOCKS5)
@@ -36,7 +34,7 @@ sysctl net.ipv6.ip_nonlocal_bind=1
 ip route add local 2001:470:e953::/48 dev lo
 
 # Run
-vproxy run -i 2001:470:e953::/48
+vproxy run -i 2001:470:e953::/48 http
 
 # Start Daemon (Run in the background), must use sudo
 vproxy start -i 2001:470:e953::/48
@@ -66,36 +64,26 @@ while true; do curl -x http://127.0.0.1:8100 -s https://api.ip.sb/ip -A Mozilla;
 2001:470:e953:f1d7:eb68:cc59:b2d0:2c6f
 ```
 
-### Command Manual
+### Manual
 
-##### Description
-
-> If no subnet is configured, the local default network proxy request will be used. When the local machine sets the priority `Ipv4`/`Ipv6` and the priority is `Ipv4`, it will always use `Ipv4` to make requests (if any).
-
-- `--bind`, Http service listening address, default 0.0.0.0:8100
-- `--ipv6-subnet`, IPv6 subnet
-- `--fallback`, The binding address used when IPv6 access is unreachable
-- `--auth-user`, Basic auth username
-- `--auth-pass`, Basic auth password
-- `--whitelist`, IP whitelist restriction
-- `--typed`, Proxy type, e.g. http, socks5
+If no subnet is configured, the local default network proxy request will be used. When the local machine sets the priority `Ipv4`/`Ipv6` and the priority is `Ipv4`, it will always use `Ipv4` to make requests (if any).
 
 ```shell
 $ vproxy -h
-Random IPv6 request proxy
+An easy and powerful Rust HTTP/Socks5 Proxy
 
 Usage: vproxy
        vproxy <COMMAND>
 
 Commands:
-  run     Run server
-  start   Start server daemon
-  restart Restart server daemon
-  stop    Stop server daemon
-  status  Show the server daemon process
-  log     Show the server daemon log
-  update  Update the application
-  help    Print this message or the help of the given subcommand(s)
+  run      Run server
+  start    Start server daemon
+  restart  Restart server daemon
+  stop     Stop server daemon
+  ps       Show the server daemon process
+  log      Show the server daemon log
+  update   Update the application
+  help     Print this message or the help of the given subcommand(s)
 
 Options:
   -h, --help     Print help
@@ -104,17 +92,20 @@ Options:
 $ vproxy run -h
 Run server
 
-Usage: vproxy run [OPTIONS]
+Usage: vproxy run [OPTIONS] <COMMAND>
+
+Commands:
+  http    Http server
+  socks5  Socks5 server
+  help    Print this message or the help of the given subcommand(s)
 
 Options:
-  -L, --debug                      Debug mode [env: VPROXY_DEBUG=]
+      --debug                      Debug mode [env: VPROXY_DEBUG=]
   -b, --bind <BIND>                Bind address [default: 0.0.0.0:8100]
-  -u, --auth-user <AUTH_USER>      Basic auth username
-  -p, --auth-pass <AUTH_PASS>      Basic auth password
+  -c, --concurrent <CONCURRENT>    Concurrent connections [default: 1024]
   -w, --whitelist <WHITELIST>      IP addresses whitelist, e.g. 47.253.53.46,47.253.81.245
   -i, --ipv6-subnet <IPV6_SUBNET>  Ipv6 subnet, e.g. 2001:db8::/32
   -f, --fallback <FALLBACK>        Fallback address
-  -T, --typed <TYPED>              Proxy type, e.g. http, socks5 [default: http]
   -h, --help                       Print help
 ```
 
@@ -137,4 +128,4 @@ Your question might already be answered on the [issues](https://github.com/gngpp
 
 ### License
 
-**vproxy** © [gngpp](https://github.com/gngpp), Released under the [MIT](./LICENSE) License.
+**vproxy** © [gngpp](https://github.com/gngpp), Released under the [GPL-30](./LICENSE) License.

@@ -18,7 +18,7 @@ An easy and powerful Rust HTTP/Socks5 proxy that allows initiating network reque
 
 - IPv4/IPv6 priority
 - Service binding `IP-CIDR` address
-- Fallback address when `Ip-CIDR` address is unreachable
+- Fallback address when `IP-CIDR` address is unreachable
 - Basic authentication
 - IP whitelist
 - Proxy support (HTTP, SOCKS5)

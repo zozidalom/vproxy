@@ -25,7 +25,7 @@ An easy and powerful Rust HTTP/Socks5 proxy that allows initiating network reque
 
 ### Usage
 
-> If you run the program with sudo, it will automatically configure sysctl net.ipv6.ip_nonlocal_bind=1 and ip route add local 2001:470:e953::/48 dev lo for you. If you do not run it with sudo, you will need to configure these manually.
+If you run the program with sudo, it will automatically configure sysctl net.ipv6.ip_nonlocal_bind=1 and ip route add local 2001:470:e953::/48 dev lo for you. If you do not run it with sudo, you will need to configure these manually.
 
 ```shell
 sysctl net.ipv6.ip_nonlocal_bind=1

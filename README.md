@@ -37,7 +37,7 @@ ip route add local 2001:470:e953::/48 dev lo
 vproxy run -i 2001:470:e953::/48 http
 
 # Start Daemon (Run in the background), must use sudo
-vproxy start -i 2001:470:e953::/48
+vproxy start -i 2001:470:e953::/48 http
 
 # Restart Daemon, must use sudo
 vproxy restart

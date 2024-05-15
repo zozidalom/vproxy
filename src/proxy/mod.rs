@@ -24,10 +24,6 @@ struct ProxyContext {
 
 #[tokio::main(flavor = "multi_thread")]
 pub async fn run(args: BootArgs) -> crate::Result<()> {
-    tracing::info!("OS: {}", std::env::consts::OS);
-    tracing::info!("Arch: {}", std::env::consts::ARCH);
-    tracing::info!("Version: {}", env!("CARGO_PKG_VERSION"));
-
     if args.debug {
         std::env::set_var("RUST_LOG", "debug");
     } else {
@@ -42,6 +38,10 @@ pub async fn run(args: BootArgs) -> crate::Result<()> {
         )
         .with(tracing_subscriber::fmt::layer())
         .init();
+
+    tracing::info!("OS: {}", std::env::consts::OS);
+    tracing::info!("Arch: {}", std::env::consts::ARCH);
+    tracing::info!("Version: {}", env!("CARGO_PKG_VERSION"));
 
     // Auto set sysctl
     #[cfg(target_os = "linux")]

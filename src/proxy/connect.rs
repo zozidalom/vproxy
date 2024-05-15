@@ -167,6 +167,10 @@ impl Connector {
             tracing::info!("connect {} via {}", addr, stream.local_addr()?);
             Ok(stream)
         })
+        .map_err(|e| {
+            tracing::error!("failed to connect {}: {}", addr, e);
+            e
+        })
     }
 }
 
@@ -204,8 +208,7 @@ async fn try_connect_with_cidr(
     cidr: IpCidr,
     extention: Extensions,
 ) -> std::io::Result<TcpStream> {
-    let (bind, socket) = create_and_bind_socket(cidr, extention).await?;
-    socket.bind(SocketAddr::new(bind, 0))?;
+    let socket = create_and_bind_socket(cidr, extention).await?;
     // Try to connect with ipv4/ipv6
     socket.connect(target_addr).await
 }
@@ -287,8 +290,7 @@ async fn try_connect_with_cidr_and_fallback(
     fallback: IpAddr,
     extention: Extensions,
 ) -> std::io::Result<TcpStream> {
-    let (bind, socket) = create_and_bind_socket(cidr, extention).await?;
-    socket.bind(SocketAddr::new(bind, 0))?;
+    let socket = create_and_bind_socket(cidr, extention).await?;
     // Try to connect with ipv6
     match socket.connect(target_addr).await {
         Ok(first) => Ok(first),
@@ -328,22 +330,19 @@ async fn try_connect_with_cidr_and_fallback(
 /// let extention = Extensions::new();
 /// let (ip, socket) = create_and_bind_socket(cidr, extention).await.unwrap();
 /// ```
-async fn create_and_bind_socket(
-    cidr: IpCidr,
-    extention: Extensions,
-) -> std::io::Result<(IpAddr, TcpSocket)> {
+async fn create_and_bind_socket(cidr: IpCidr, extention: Extensions) -> std::io::Result<TcpSocket> {
     match cidr {
         IpCidr::V4(cidr) => {
             let socket = TcpSocket::new_v4()?;
             let bind = IpAddr::V4(assign_ipv4_from_extention(&cidr, extention));
             socket.bind(SocketAddr::new(bind, 0))?;
-            Ok((bind, socket))
+            Ok(socket)
         }
         IpCidr::V6(cidr) => {
             let socket = TcpSocket::new_v6()?;
             let bind = IpAddr::V6(assign_ipv6_from_extention(&cidr, extention));
             socket.bind(SocketAddr::new(bind, 0))?;
-            Ok((bind, socket))
+            Ok(socket)
         }
     }
 }

@@ -209,7 +209,6 @@ async fn try_connect_with_cidr(
     extention: Extensions,
 ) -> std::io::Result<TcpStream> {
     let socket = create_and_bind_socket(cidr, extention).await?;
-    // Try to connect with ipv4/ipv6
     socket.connect(target_addr).await
 }
 

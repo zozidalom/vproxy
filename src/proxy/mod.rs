@@ -2,6 +2,8 @@ mod auth;
 mod connect;
 mod http;
 mod murmur;
+#[cfg(target_os = "linux")]
+mod route;
 mod socks5;
 
 use crate::{AuthMode, BootArgs, Proxy};
@@ -43,33 +45,22 @@ pub async fn run(args: BootArgs) -> crate::Result<()> {
     tracing::info!("Arch: {}", std::env::consts::ARCH);
     tracing::info!("Version: {}", env!("CARGO_PKG_VERSION"));
 
-    // Auto set sysctl
     #[cfg(target_os = "linux")]
-    args.cidr.map(|v6| {
-        crate::util::sysctl_ipv6_no_local_bind();
-        crate::util::sysctl_route_add_cidr(&v6);
-    });
+    if let Some(cidr) = &args.cidr {
+        route::sysctl_ipv6_no_local_bind();
+        route::sysctl_route_add_cidr(&cidr).await;
+    }
+
+    let ctx = move |auth: AuthMode| ProxyContext {
+        bind: args.bind,
+        concurrent: args.concurrent,
+        auth,
+        whitelist: args.whitelist,
+        connector: connect::Connector::new(args.cidr, args.fallback),
+    };
 
     match args.proxy {
-        Proxy::Http { auth } => {
-            http::proxy(ProxyContext {
-                bind: args.bind,
-                concurrent: args.concurrent,
-                auth,
-                whitelist: args.whitelist,
-                connector: connect::Connector::new(args.cidr, args.fallback),
-            })
-            .await
-        }
-        Proxy::Socks5 { auth } => {
-            socks5::proxy(ProxyContext {
-                bind: args.bind,
-                concurrent: args.concurrent,
-                auth,
-                whitelist: args.whitelist,
-                connector: connect::Connector::new(args.cidr, args.fallback),
-            })
-            .await
-        }
+        Proxy::Http { auth } => http::proxy(ctx(auth)).await,
+        Proxy::Socks5 { auth } => socks5::proxy(ctx(auth)).await,
     }
 }

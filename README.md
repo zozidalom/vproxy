@@ -28,6 +28,12 @@ An easy and powerful Rust HTTP/Socks5 proxy that allows initiating network reque
 
 ### Install
 
+- Curl
+
+```shell
+curl -s https://raw.githubusercontent.com/0x676e67/vproxy/main/install.sh | bash
+```
+
 - Cargo
 
 ```shell
@@ -151,7 +157,6 @@ Your question might already be answered on the [issues](https://github.com/gngpp
 ### License
 
 **vproxy** © [gngpp](https://github.com/gngpp), Released under the [GPL-30](./LICENSE) License.
-
 
 Your question might already be answered on the [issues](https://github.com/gngpp/vproxy/issues)
 

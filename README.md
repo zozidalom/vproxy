@@ -31,7 +31,7 @@ An easy and powerful Rust HTTP/Socks5 proxy that allows initiating network reque
 - Curl
 
 ```shell
-curl -s https://raw.githubusercontent.com/0x676e67/vproxy/main/install.sh | bash
+curl -s -o /tmp/install.sh https://raw.githubusercontent.com/0x676e67/vproxy/main/install.sh && bash /tmp/install.sh
 ```
 
 - Cargo

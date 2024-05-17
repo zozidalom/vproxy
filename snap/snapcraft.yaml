@@ -5,7 +5,7 @@ description: |
   An easy and powerful Rust HTTP/Socks5 proxy that allows initiating network requests using IP binding calculated from CIDR addresses.
 
 grade: stable # must be 'stable' to release into candidate/stable channels
-confinement: strict # use 'strict' once you have the right plugs and slots
+confinement: classic # use 'strict' once you have the right plugs and slots
 
 base: core18
 
@@ -21,4 +21,3 @@ parts:
 apps:
   vproxy:
     command: bin/vproxy
-    plugs: [network, network-bind]

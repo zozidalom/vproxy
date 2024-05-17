@@ -7,6 +7,9 @@
 <img src="https://img.shields.io/github/release/gngpp/vproxy.svg?style=flat">
 </a>
 </a><a href="https://github.com/gngpp/vproxy/releases">
+<a href="https://snapcraft.io/vproxy">
+<img alt="vproxy" src="https://snapcraft.io/vproxy/badge.svg" />
+</a>
 <img src="https://img.shields.io/github/downloads/gngpp/vproxy/total?style=flat">
 </a>
 
@@ -22,6 +25,22 @@ An easy and powerful Rust HTTP/Socks5 proxy that allows initiating network reque
 - Basic authentication
 - IP whitelist
 - Proxy support (HTTP, SOCKS5)
+
+### Install
+
+- Cargo
+
+```shell
+cargo install vproxy
+```
+
+- Snap
+
+```shell
+snap install vproxy
+# or edge
+snap install vproxy --edge
+```
 
 ### Usage
 
@@ -112,14 +131,6 @@ Options:
   -h, --help                     Print help
 ```
 
-### Install
-
-- Cargo
-
-```shell
-cargo install vproxy
-```
-
 ### Compile
 
 - To compile on a Linux machine (e.g., Ubuntu):
@@ -134,6 +145,13 @@ cargo build --release
 If you would like to submit your contribution, please open a [Pull Request](https://github.com/gngpp/vproxy/pulls).
 
 ### Getting help
+
+Your question might already be answered on the [issues](https://github.com/gngpp/vproxy/issues)
+
+### License
+
+**vproxy** © [gngpp](https://github.com/gngpp), Released under the [GPL-30](./LICENSE) License.
+
 
 Your question might already be answered on the [issues](https://github.com/gngpp/vproxy/issues)
 

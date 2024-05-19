@@ -118,7 +118,7 @@ Options:
   -V, --version  Print version
 
 $ vproxy run -h
-Run proxyserver
+Run server
 
 Usage: vproxy run [OPTIONS] <COMMAND>
 
@@ -128,13 +128,14 @@ Commands:
   help    Print this message or the help of the given subcommand(s)
 
 Options:
-      --debug                    Debug mode [env: VPROXY_DEBUG=]
-  -b, --bind <BIND>              Bind address [default: 0.0.0.0:8100]
-  -c, --concurrent <CONCURRENT>  Concurrent connections [default: 1024]
-  -w, --whitelist <WHITELIST>    IP addresses whitelist, e.g. 47.253.53.46,47.253.81.245
-  -i, --cidr <CIDR>              Ip-CIDR, e.g. 2001:db8::/32
-  -f, --fallback <FALLBACK>      Fallback address
-  -h, --help                     Print help
+      --debug                              Debug mode [env: VPROXY_DEBUG=]
+  -b, --bind <BIND>                        Bind address [default: 0.0.0.0:8100]
+  -c, --concurrent <CONCURRENT>            Concurrent connections [default: 1024]
+  -T, --connect-timeout <CONNECT_TIMEOUT>  Connection timeout [default: 10]
+  -w, --whitelist <WHITELIST>              IP addresses whitelist, e.g. 47.253.53.46,47.253.81.245
+  -i, --cidr <CIDR>                        Ip-CIDR, e.g. 2001:db8::/32
+  -f, --fallback <FALLBACK>                Fallback address
+  -h, --help                               Print help
 ```
 
 ### Compile

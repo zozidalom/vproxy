@@ -7,9 +7,6 @@
 <img src="https://img.shields.io/github/release/gngpp/vproxy.svg?style=flat">
 </a>
 </a><a href="https://github.com/gngpp/vproxy/releases">
-<a href="https://snapcraft.io/vproxy">
-<img alt="vproxy" src="https://snapcraft.io/vproxy/badge.svg" />
-</a>
 <img src="https://img.shields.io/github/downloads/gngpp/vproxy/total?style=flat">
 </a>
 
@@ -38,14 +35,6 @@ curl -s -o /tmp/install.sh https://raw.githubusercontent.com/0x676e67/vproxy/mai
 
 ```shell
 cargo install vproxy
-```
-
-- Snap
-
-```shell
-snap install vproxy
-# or edge
-snap install vproxy --edge
 ```
 
 ### Usage

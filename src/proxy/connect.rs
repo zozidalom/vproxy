@@ -88,6 +88,7 @@ impl Connector {
         extension: Extensions,
     ) -> Result<Response<Incoming>, ProxyError> {
         let mut connector = HttpConnector::new();
+        connector.set_connect_timeout(Some(self.connect_timeout));
 
         match (self.cidr, self.fallback) {
             (Some(IpCidr::V4(cidr)), Some(IpAddr::V6(v6))) => {
@@ -111,17 +112,14 @@ impl Connector {
             _ => {}
         }
 
-        let resp = tokio::time::timeout(
-            self.connect_timeout,
-            Client::builder(TokioExecutor::new())
-                .http1_title_case_headers(true)
-                .http1_preserve_header_case(true)
-                .build(connector)
-                .request(req),
-        )
-        .await?;
+        let resp = Client::builder(TokioExecutor::new())
+            .http1_title_case_headers(true)
+            .http1_preserve_header_case(true)
+            .build(connector)
+            .request(req)
+            .await?;
 
-        Ok(resp?)
+        Ok(resp)
     }
 
     /// Attempts to establish a connection to a given domain and port.

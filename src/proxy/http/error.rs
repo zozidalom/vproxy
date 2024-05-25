@@ -4,18 +4,18 @@ use super::auth::AuthError;
 #[derive(thiserror::Error, Debug)]
 pub enum ProxyError {
     /// Hyper Error
-    #[error("{0:?}")]
+    #[error(transparent)]
     HyperError(#[from] hyper::Error),
 
     /// Hyper Legacy Error
-    #[error("{0:?}")]
+    #[error(transparent)]
     HyperLegacyError(#[from] hyper_util::client::legacy::Error),
 
     /// Hyper HTTP Error
-    #[error("{0:?}")]
+    #[error(transparent)]
     AuthError(#[from] AuthError),
 
     /// Tokio timeout Error
-    #[error("{0:?}")]
+    #[error(transparent)]
     Timeout(#[from] tokio::time::error::Elapsed),
 }

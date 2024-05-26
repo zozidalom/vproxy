@@ -24,6 +24,7 @@ impl Extensions {
     const SESSION_ID_HEADER: &'static str = "session-id";
 
     fn new(s: &str) -> Self {
+        // If the remaining string is not empty, it is considered as the session ID.
         if !s.is_empty() {
             let (a, b) = murmur::murmurhash3_x64_128(s.as_bytes(), s.len() as u64);
             Extensions::Session((a, b))
@@ -49,7 +50,6 @@ impl From<(&str, &str)> for Extensions {
             if let Some(s) = s.strip_prefix(prefix) {
                 // Then, remove the "-session-" character that follows the prefix.
                 let s = s.trim_start_matches("-session-");
-                // If the remaining string is not empty, it is considered as the session ID.
                 // Return it wrapped in the `Session` variant of `AuthExpand`.
                 return Self::new(s);
             }
@@ -63,18 +63,17 @@ impl From<(&str, &str)> for Extensions {
 
 impl From<&mut HeaderMap> for Extensions {
     fn from(headers: &mut HeaderMap) -> Self {
-        // Get the value of the `x-session-id` header from the headers.
+        // Get the value of the `session-id` header from the headers.
         if let Some(value) = headers.get(Self::SESSION_ID_HEADER) {
             // Convert the value to a string.
             if let Ok(s) = value.to_str() {
-                // If the remaining string is not empty, it is considered as the session ID.
                 // Return it wrapped in the `Session` variant of `AuthExpand`.
                 let extensions = Self::new(s);
                 headers.remove(Self::SESSION_ID_HEADER);
                 return extensions;
             }
         }
-        // If the `x-session-id` header is not present, or if the value is not a valid
+        // If the `session-id` header is not present, or if the value is not a valid
         // string, return the `None` variant of `AuthExpand`.
         Extensions::None
     }

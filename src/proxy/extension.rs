@@ -24,7 +24,7 @@ pub enum Extensions {
 
 impl Extensions {
     /// Header names
-    const HEADER_HTTP_TO_SOCKS5: &'static str = "http-to-socks5";
+    const HEADER_HTTP_TO_SOCKS5: &'static str = "http2socks5";
     const HEADER_SESSION_ID: &'static str = "session-id";
     /// Split tag
     const TAG_HTTP2SOCKS5: &'static str = "-h2s-";
@@ -78,7 +78,7 @@ impl From<&mut HeaderMap> for Extensions {
                 return extensions;
             }
         }
-        // Get the value of the `http-to-socks5` header from the headers.
+        // Get the value of the `http2socks5` header from the headers.
         if let Some(value) = headers.get(Self::HEADER_HTTP_TO_SOCKS5) {
             // Convert the value to a string.
             if let Ok(s) = value.to_str() {

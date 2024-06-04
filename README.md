@@ -97,7 +97,7 @@ Append `-session-id` to the username, where session is a fixed value and ID is a
 
 - Http2Socks5 extension
 
-Append `-h2s-host|port|username|password` to the username, or `-h2s-host|port` if password is not required. For HTTP users using passwordless authorization, you can add an `http-to-socks5` header to the request (e.g. `http-to-socks5: host|port|username|password`). Chrome and Firefox cannot set `--proxy-header` like curl can.
+Append `-h2s-host|port|username|password` to the username, or `-h2s-host|port` if password is not required. For HTTP users using passwordless authorization, you can add an `http2socks5` header to the request (e.g. `http2socks5: host|port|username|password`). Chrome and Firefox cannot set `--proxy-header` like curl can.
 
 #### Examples
 

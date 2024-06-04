@@ -1,13 +1,13 @@
-[![CI](https://github.com/gngpp/vproxy/actions/workflows/ci.yml/badge.svg)](https://github.com/gngpp/vproxy/actions/workflows/ci.yml)
-[![CI](https://github.com/gngpp/vproxy/actions/workflows/release.yml/badge.svg)](https://github.com/gngpp/vproxy/actions/workflows/release.yml)
-<a target="_blank" href="https://github.com/gngpp/vproxy/blob/main/LICENSE">
+[![CI](https://github.com/0x676e67/vproxy/actions/workflows/ci.yml/badge.svg)](https://github.com/0x676e67/vproxy/actions/workflows/ci.yml)
+[![CI](https://github.com/0x676e67/vproxy/actions/workflows/release.yml/badge.svg)](https://github.com/0x676e67/vproxy/actions/workflows/release.yml)
+<a target="_blank" href="https://github.com/0x676e67/vproxy/blob/main/LICENSE">
 <img src="https://img.shields.io/badge/GPL-3.0-blue.svg"/>
 </a>
-<a href="https://github.com/gngpp/vproxy/releases">
-<img src="https://img.shields.io/github/release/gngpp/vproxy.svg?style=flat">
+<a href="https://github.com/0x676e67/vproxy/releases">
+<img src="https://img.shields.io/github/release/0x676e67/vproxy.svg?style=flat">
 </a>
-</a><a href="https://github.com/gngpp/vproxy/releases">
-<img src="https://img.shields.io/github/downloads/gngpp/vproxy/total?style=flat">
+</a><a href="https://github.com/0x676e67/vproxy/releases">
+<img src="https://img.shields.io/github/downloads/0x676e67/vproxy/total?style=flat">
 </a>
 
 # vproxy
@@ -194,24 +194,24 @@ Options:
 - To compile on a Linux machine (e.g., Ubuntu):
 
 ```shell
-git clone https://github.com/gngpp/vproxy.git && cd vproxy
+git clone https://github.com/0x676e67/vproxy.git && cd vproxy
 cargo build --release
 ```
 
 ### Contributing
 
-If you would like to submit your contribution, please open a [Pull Request](https://github.com/gngpp/vproxy/pulls).
+If you would like to submit your contribution, please open a [Pull Request](https://github.com/0x676e67/vproxy/pulls).
 
 ### Getting help
 
-Your question might already be answered on the [issues](https://github.com/gngpp/vproxy/issues)
+Your question might already be answered on the [issues](https://github.com/0x676e67/vproxy/issues)
 
 ### License
 
-**vproxy** © [gngpp](https://github.com/gngpp), Released under the [GPL-30](./LICENSE) License.
+**vproxy** © [0x676e67](https://github.com/0x676e67), Released under the [GPL-3.0](./LICENSE) License.
 
-Your question might already be answered on the [issues](https://github.com/gngpp/vproxy/issues)
+Your question might already be answered on the [issues](https://github.com/0x676e67/vproxy/issues)
 
 ### License
 
-**vproxy** © [gngpp](https://github.com/gngpp), Released under the [GPL-30](./LICENSE) License.
+**vproxy** © [0x676e67](https://github.com/0x676e67), Released under the [GPL-3.0](./LICENSE) License.

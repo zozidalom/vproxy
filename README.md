@@ -20,9 +20,7 @@ An easy and powerful Rust HTTP/Socks5 proxy that allows initiating network reque
 - Service binding `IP-CIDR` address
 - Fallback address when `IP-CIDR` address is unreachable
 - Basic authentication
-- Whitelist Extension
-- Session Extension
-- Http2Socks5 Extension
+- `Whitelist`/`Session`/`Http2Socks5` Extension
 - Proxy support (HTTP, SOCKS5)
 
 ## Install

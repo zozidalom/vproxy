@@ -14,7 +14,7 @@
 
 An easy and powerful Rust HTTP/Socks5 proxy that allows initiating network requests using IP binding calculated from CIDR addresses.
 
-### Features
+## Features
 
 - IPv4/IPv6 priority
 - Service binding `IP-CIDR` address
@@ -25,7 +25,7 @@ An easy and powerful Rust HTTP/Socks5 proxy that allows initiating network reque
 - Http2Socks5 Extension
 - Proxy support (HTTP, SOCKS5)
 
-### Install
+## Install
 
 - Curl
 
@@ -39,7 +39,7 @@ curl -s -o /tmp/install.sh https://raw.githubusercontent.com/0x676e67/vproxy/mai
 cargo install vproxy
 ```
 
-### Usage
+## Usage
 
 If you run the program with sudo, it will automatically configure sysctl net.ipv6.ip_nonlocal_bind=1 and ip route add local 2001:470:e953::/48 dev lo for you. If you do not run it with sudo, you will need to configure these manually.
 
@@ -83,7 +83,7 @@ while true; do curl -x http://127.0.0.1:8100 -s https://api.ip.sb/ip -A Mozilla;
 
 ```
 
-### Manual
+## Manual
 
 If no subnet is configured, the local default network proxy request will be used. When the local machine sets the priority `Ipv4`/`Ipv6` and the priority is `Ipv4`, it will always use `Ipv4` to make requests (if any).
 
@@ -189,7 +189,7 @@ Options:
   -h, --help                               Print help
 ```
 
-### Compile
+## Compile
 
 - To compile on a Linux machine (e.g., Ubuntu):
 
@@ -198,20 +198,20 @@ git clone https://github.com/0x676e67/vproxy.git && cd vproxy
 cargo build --release
 ```
 
-### Contributing
+## Contributing
 
 If you would like to submit your contribution, please open a [Pull Request](https://github.com/0x676e67/vproxy/pulls).
 
-### Getting help
+## Getting help
 
 Your question might already be answered on the [issues](https://github.com/0x676e67/vproxy/issues)
 
-### License
+## License
 
 **vproxy** © [0x676e67](https://github.com/0x676e67), Released under the [GPL-3.0](./LICENSE) License.
 
 Your question might already be answered on the [issues](https://github.com/0x676e67/vproxy/issues)
 
-### License
+## License
 
 **vproxy** © [0x676e67](https://github.com/0x676e67), Released under the [GPL-3.0](./LICENSE) License.

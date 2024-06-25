@@ -12,7 +12,7 @@
 
 # vproxy
 
-An easy and powerful Rust HTTP/Socks5 proxy that allows initiating network requests using IP binding calculated from CIDR addresses.
+An easy and powerful Rust `HTTP`/`Socks5`/`HTTP2Socks5` proxy that allows initiating network requests using IP binding calculated from CIDR addresses.
 
 ## Features
 
@@ -21,7 +21,7 @@ An easy and powerful Rust HTTP/Socks5 proxy that allows initiating network reque
 - Fallback address when `IP-CIDR` address is unreachable
 - Basic authentication
 - `Whitelist`/`Session`/`Http2Socks5` Extension
-- Proxy support (HTTP, SOCKS5)
+- Proxy support (`HTTP`, `SOCKS5`, `HTTP2Socks5`)
 
 ## Install
 

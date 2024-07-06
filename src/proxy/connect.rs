@@ -443,8 +443,7 @@ async fn try_connect_with_cidr_and_fallback(
     fallback: IpAddr,
     extension: &Extensions,
 ) -> std::io::Result<TcpStream> {
-    let socket = create_socket_with_cidr(cidr, &extension).await?;
-    match socket.connect(target_addr).await {
+    match try_connect_with_cidr(target_addr, cidr, extension).await {
         Ok(first) => Ok(first),
         Err(err) => {
             tracing::debug!("try connect with ipv6 failed: {}", err);

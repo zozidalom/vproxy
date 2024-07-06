@@ -75,7 +75,7 @@ impl Authenticator {
                     Ok(Extensions::from((username.as_str(), auth_username)))
                 } else {
                     tracing::warn!("Unauthorized access from {}", socket);
-                    return Err(AuthError::Forbidden);
+                    Err(AuthError::Forbidden)
                 }
             }
         }

@@ -260,17 +260,17 @@ impl Connector {
             }
 
             Extensions::None | Extensions::Session(_) => match (self.cidr, self.fallback) {
+                (None, Some(fallback)) => {
+                    timeout(
+                        self.connect_timeout,
+                        try_connect_with_addr(target_addr, fallback),
+                    )
+                    .await?
+                }
                 (Some(cidr), None) => {
                     timeout(
                         self.connect_timeout,
                         try_connect_with_cidr(target_addr, cidr, &extension),
-                    )
-                    .await?
-                }
-                (None, Some(fallback)) => {
-                    timeout(
-                        self.connect_timeout,
-                        try_connect_with_fallback(target_addr, fallback),
                     )
                     .await?
                 }
@@ -281,7 +281,7 @@ impl Connector {
                     )
                     .await?
                 }
-                (None, None) => {
+                _ => {
                     timeout(self.connect_timeout, TcpStream::connect(target_addr)).await?
                 }
             },
@@ -401,7 +401,7 @@ async fn try_connect_with_cidr(
 /// This function returns a `std::io::Result<TcpStream>`. If a connection is
 /// successfully established, it returns `Ok(stream)`. If there is an error at
 /// any step, it returns the error in the `Result`.
-async fn try_connect_with_fallback(
+async fn try_connect_with_addr(
     target_addr: SocketAddr,
     fallback: IpAddr,
 ) -> std::io::Result<TcpStream> {
@@ -450,7 +450,7 @@ async fn try_connect_with_cidr_and_fallback(
         Ok(first) => Ok(first),
         Err(err) => {
             tracing::debug!("try connect with ipv6 failed: {}", err);
-            try_connect_with_fallback(target_addr, fallback).await
+            try_connect_with_addr(target_addr, fallback).await
         }
     }
 }

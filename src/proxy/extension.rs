@@ -66,15 +66,14 @@ impl From<(&str, &str)> for Extensions {
     }
 }
 
-impl From<&mut HeaderMap> for Extensions {
-    fn from(headers: &mut HeaderMap) -> Self {
+impl From<&HeaderMap> for Extensions {
+    fn from(headers: &HeaderMap) -> Self {
         // Get the value of the `session-id` header from the headers.
         if let Some(value) = headers.get(Self::HEADER_SESSION_ID) {
             // Convert the value to a string.
             if let Ok(s) = value.to_str() {
                 // Return it wrapped in the `Session` variant of `Extensions`.
                 let extensions = parse_session_extension(s);
-                headers.remove(Self::HEADER_SESSION_ID);
                 return extensions;
             }
         }
@@ -84,7 +83,6 @@ impl From<&mut HeaderMap> for Extensions {
             if let Ok(s) = value.to_str() {
                 // Split host:port:username:password
                 let extensions = parse_socks5_extension(s);
-                headers.remove(Self::HEADER_HTTP_TO_SOCKS5);
                 return extensions;
             }
         }

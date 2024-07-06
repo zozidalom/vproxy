@@ -14,14 +14,6 @@
 
 An easy and powerful Rust `HTTP`/`Socks5`/`HTTP2Socks5` proxy that allows initiating network requests using IP binding calculated from CIDR addresses.
 
-## Sponsor
-
-If you find this project helpful, please consider sponsoring me to support ongoing development:
-
-**USDT-TRC20**: TCwD8HfHnJ7236Hdj3HF5uZKR2keeWeqZe
-**LTC-Litecoin**: MLV84q38u6vzjsn2w53THH8DH7ydjXRpkq
-
-
 ## Features
 
 - IPv4/IPv6 priority
@@ -30,6 +22,12 @@ If you find this project helpful, please consider sponsoring me to support ongoi
 - Basic authentication
 - `Whitelist`/`Session`/`Http2Socks5` Extension
 - Proxy support (`HTTP`, `SOCKS5`, `HTTP2Socks5`)
+
+## Sponsor
+
+If you find this project helpful, please consider sponsoring me to support ongoing development:
+
+**USDT-TRC20**: TCwD8HfHnJ7236Hdj3HF5uZKR2keeWeqZe
 
 ## Install
 

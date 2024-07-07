@@ -31,7 +31,11 @@ pub async fn run(args: BootArgs) -> crate::Result<()> {
     // Initialize the logger with a filter that ignores WARN level logs for netlink_proto
     let filter = EnvFilter::from_default_env()
         .add_directive(LevelFilter::INFO.into())
-        .add_directive("netlink_proto=error".parse().unwrap());
+        .add_directive(
+            "netlink_proto=error"
+                .parse()
+                .expect("failed to parse directive"),
+        );
 
     let subscriber = FmtSubscriber::builder()
         .with_max_level(if cfg!(debug_assertions) {

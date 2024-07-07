@@ -62,7 +62,7 @@ async fn handle_connection(proxy: HttpProxy, stream: TcpStream, socket: SocketAd
 }
 
 #[derive(Clone)]
-struct HttpProxy(Arc<Authenticator>, Arc<Connector>);
+struct HttpProxy(Arc<(Authenticator, Connector)>);
 
 impl From<ProxyContext> for HttpProxy {
     fn from(ctx: ProxyContext) -> Self {
@@ -76,7 +76,7 @@ impl From<ProxyContext> for HttpProxy {
             _ => Authenticator::None(ctx.whitelist),
         };
 
-        HttpProxy(Arc::new(auth), Arc::new(ctx.connector))
+        HttpProxy(Arc::new((auth, ctx.connector)))
     }
 }
 
@@ -89,7 +89,7 @@ impl HttpProxy {
         tracing::info!("request: {req:?}, {socket:?}", req = req, socket = socket);
 
         // Check if the client is authorized
-        let extension = match self.0.authenticate(req.headers_mut(), socket) {
+        let extension = match self.0 .0.authenticate(req.headers_mut(), socket) {
             Ok(extension) => extension,
             // If the client is not authorized, return an error response
             Err(e) => return Ok(e.into()),
@@ -131,7 +131,8 @@ impl HttpProxy {
             }
         } else {
             Ok(self
-                .1
+                .0
+                 .1
                 .new_http_request(req, extension)
                 .await?
                 .map(|b| b.boxed()))
@@ -148,7 +149,7 @@ impl HttpProxy {
     ) -> std::io::Result<()> {
         let mut server = {
             let addrs = addr_str.to_socket_addrs()?;
-            self.1.try_connect_with_addrs(addrs, extension).await?
+            self.0 .1.try_connect_with_addrs(addrs, extension).await?
         };
 
         tunnel_proxy(upgraded, &mut server).await

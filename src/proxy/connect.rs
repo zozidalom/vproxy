@@ -259,7 +259,7 @@ impl Connector {
                 .await?
             }
 
-            Extensions::None | Extensions::Session(_) => match (self.cidr, self.fallback) {
+            Extensions::None | Extensions::Session(_, _) => match (self.cidr, self.fallback) {
                 (None, Some(fallback)) => {
                     timeout(
                         self.connect_timeout,
@@ -568,7 +568,7 @@ fn error(last_err: Option<std::io::Error>) -> std::io::Error {
 /// generates a random IPv4 address within the CIDR range.
 fn assign_ipv4_from_extension(cidr: &Ipv4Cidr, extension: &Extensions) -> Ipv4Addr {
     match extension {
-        Extensions::Session((a, b)) => {
+        Extensions::Session(a, b) => {
             let combined = combine(*a, *b);
             // Calculate the subnet mask and apply it to ensure the base_ip is preserved in
             // the non-variable part
@@ -592,7 +592,7 @@ fn assign_ipv4_from_extension(cidr: &Ipv4Cidr, extension: &Extensions) -> Ipv4Ad
 /// generates a random IPv6 address within the CIDR range.
 fn assign_ipv6_from_extension(cidr: &Ipv6Cidr, extension: &Extensions) -> Ipv6Addr {
     match extension {
-        Extensions::Session((a, b)) => {
+        Extensions::Session(a, b) => {
             let combined = combine(*a, *b);
             // Calculate the subnet mask and apply it to ensure the base_ip is preserved in
             // the non-variable part

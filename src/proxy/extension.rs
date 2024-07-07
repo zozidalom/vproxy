@@ -14,7 +14,7 @@ pub enum Extensions {
     /// No extension.
     None,
     /// Session extension with a tuple of two 64-bit integers.
-    Session((u64, u64)),
+    Session(u64, u64),
     /// Http to Socks5 extension. e.g. host:port:username:password
     Http2Socks5((String, u16), Option<UsernamePassword>),
 }
@@ -156,7 +156,7 @@ fn handle_extension(
 /// Otherwise, it will return `Extensions::None`.
 fn parse_session_extension(s: &str) -> Extensions {
     let (a, b) = murmur::murmurhash3_x64_128(s.as_bytes(), s.len() as u64);
-    Extensions::Session((a, b))
+    Extensions::Session(a, b)
 }
 
 /// Parses a SOCKS5 extension string.

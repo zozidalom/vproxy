@@ -1,6 +1,6 @@
 use super::{
     extension::Extensions,
-    http::error::ProxyError,
+    http::error::Error,
     socks5::{self, proto::UsernamePassword},
 };
 use cidr::{IpCidr, Ipv4Cidr, Ipv6Cidr};
@@ -96,7 +96,7 @@ impl Connector {
         &self,
         req: Request<Incoming>,
         extension: Extensions,
-    ) -> Result<Response<Incoming>, ProxyError> {
+    ) -> Result<Response<Incoming>, Error> {
         let mut connector = HttpConnector::new();
         connector.set_connect_timeout(Some(self.connect_timeout));
 

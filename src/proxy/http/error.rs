@@ -1,18 +1,17 @@
 #[derive(thiserror::Error, Debug)]
-pub enum ProxyError {
-    /// Hyper Error
+pub enum Error {
+    #[error(transparent)]
+    HttpError(#[from] http::Error),
+
     #[error(transparent)]
     HyperError(#[from] hyper::Error),
 
-    /// Hyper Legacy Error
     #[error(transparent)]
     HyperLegacyError(#[from] hyper_util::client::legacy::Error),
 
-    /// Hyper HTTP Error
     #[error(transparent)]
     AuthError(#[from] super::auth::AuthError),
 
-    /// Tokio timeout Error
     #[error(transparent)]
     Timeout(#[from] tokio::time::error::Elapsed),
 }

@@ -1,6 +1,9 @@
 use crate::proxy::extension::{Extensions, Whitelist};
+use crate::proxy::http::empty;
 use base64::Engine;
-use http::{header, HeaderMap};
+use bytes::Bytes;
+use http::{header, HeaderMap, Response, StatusCode};
+use http_body_util::combinators::BoxBody;
 use std::net::{IpAddr, SocketAddr};
 
 /// Auth Error
@@ -10,6 +13,21 @@ pub enum AuthError {
     ProxyAuthenticationRequired,
     #[error("Forbidden")]
     Forbidden,
+}
+
+impl TryInto<Response<BoxBody<Bytes, hyper::Error>>> for AuthError {
+    type Error = http::Error;
+    fn try_into(self) -> Result<Response<BoxBody<Bytes, hyper::Error>>, Self::Error> {
+        match self {
+            AuthError::ProxyAuthenticationRequired => Response::builder()
+                .status(StatusCode::PROXY_AUTHENTICATION_REQUIRED)
+                .header(header::PROXY_AUTHENTICATE, "Basic realm=\"Proxy\"")
+                .body(empty()),
+            AuthError::Forbidden => Response::builder()
+                .status(StatusCode::FORBIDDEN)
+                .body(empty()),
+        }
+    }
 }
 
 /// Enum representing different types of authenticators.

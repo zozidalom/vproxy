@@ -1,13 +1,10 @@
 mod auth;
 pub mod error;
 
-use self::{
-    auth::{AuthError, Authenticator},
-    error::ProxyError,
-};
+use self::{auth::Authenticator, error::Error};
 use super::{connect::Connector, extension::Extensions, ProxyContext};
 use bytes::Bytes;
-use http::{header, StatusCode};
+use http::StatusCode;
 use http_body_util::{combinators::BoxBody, BodyExt, Empty, Full};
 use hyper::{
     body::Incoming, server::conn::http1, service::service_fn, upgrade::Upgraded, Method, Request,
@@ -85,14 +82,14 @@ impl HttpProxy {
         self,
         socket: SocketAddr,
         mut req: Request<Incoming>,
-    ) -> Result<Response<BoxBody<Bytes, hyper::Error>>, ProxyError> {
+    ) -> Result<Response<BoxBody<Bytes, hyper::Error>>, Error> {
         tracing::info!("request: {req:?}, {socket:?}", req = req, socket = socket);
 
         // Check if the client is authorized
         let extension = match self.0 .0.authenticate(req.headers_mut(), socket) {
             Ok(extension) => extension,
             // If the client is not authorized, return an error response
-            Err(e) => return Ok(e.into()),
+            Err(e) => return Ok(e.try_into()?),
         };
 
         if Method::CONNECT == req.method() {
@@ -166,22 +163,6 @@ async fn tunnel_proxy(upgraded: Upgraded, server: &mut TcpStream) -> std::io::Re
         from_server
     );
     Ok(())
-}
-
-impl Into<Response<BoxBody<Bytes, hyper::Error>>> for AuthError {
-    fn into(self) -> Response<BoxBody<Bytes, hyper::Error>> {
-        match self {
-            AuthError::ProxyAuthenticationRequired => Response::builder()
-                .status(StatusCode::PROXY_AUTHENTICATION_REQUIRED)
-                .header(header::PROXY_AUTHENTICATE, "Basic realm=\"Proxy\"")
-                .body(empty())
-                .unwrap(),
-            AuthError::Forbidden => Response::builder()
-                .status(StatusCode::FORBIDDEN)
-                .body(empty())
-                .unwrap(),
-        }
-    }
 }
 
 fn host_addr(uri: &http::Uri) -> Option<String> {

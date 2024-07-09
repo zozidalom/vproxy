@@ -100,7 +100,7 @@ impl Authenticator {
     }
 }
 
-fn option_ext<'a>(headers: &'a HeaderMap) -> Option<String> {
+fn option_ext(headers: &HeaderMap) -> Option<String> {
     let basic_auth = headers
         .get(header::PROXY_AUTHORIZATION)
         .and_then(|hv| hv.to_str().ok())

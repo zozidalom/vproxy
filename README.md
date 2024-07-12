@@ -21,7 +21,7 @@ An easy and powerful Rust `HTTP`/`Socks5`/`HTTP2Socks5` proxy
 - Service binding `IP-CIDR` address
 - Fallback address when `IP-CIDR` address is unreachable
 - Basic authentication
-- `Whitelist`/`Session`/`Http2Socks5` Extension
+- `Session`/`TTL`/`Http2Socks5`/`Whitelist` Extension
 - Proxy support (`HTTP`, `SOCKS5`, `HTTP2Socks5`)
 
 ## Sponsor
@@ -96,6 +96,9 @@ If no subnet is configured, the local default network proxy request will be used
 
 When using passwordless authorization, if an IP whitelist exists, only authorized IPs can pass the request.
 
+- TTL extension
+Append `-ttl-` to the username, where TTL is a fixed value (e.g., `username-ttl-2`). The TTL value is the number of requests that can be made with the same IP. When the TTL value is reached, the IP will be changed. For HTTP users who are using passwordless authorization and need a fixed IP address, you can add the `ttl` header to the request (e.g., `ttl: 2`). By keeping the TTL value unchanged, you can use a fixed IP. Keep in mind Chrome and Firefox can't set `--proxy-header` like curl.
+
 - Session extension
 
 Append `-session-id` to the username, where session is a fixed value and ID is an arbitrary random value (e.g., `username-session-123456`). Keep the Session ID unchanged to use a fixed IP.For HTTP users who are using password-less authorization and need a fixed IP address, you can add the `session` header to the request (e.g., `session: 123456`). By keeping the Session ID unchanged, you can use a fixed IP. Keep in mind Chrome and Firefox can't set `--proxy-header` like curl.
@@ -152,7 +155,7 @@ $ for i in `seq 1 3`; do curl -x "socks5h://test-session-987654321:test@127.0.0.
 
 ```
 
-- TTL proxy session with passwordless authorization
+- TTL proxy session with username and password
 
 ```shell
 ./vproxy run --bind 127.0.0.1:8101 -i 2001:470:70c6::/48 socks5 -u test -p test

@@ -1,4 +1,4 @@
-mod connector;
+mod connect;
 mod extension;
 mod http;
 mod murmur;
@@ -6,7 +6,7 @@ mod murmur;
 mod route;
 mod socks5;
 
-use self::connector::Connector;
+use self::connect::Connector;
 use crate::{AuthMode, BootArgs, Proxy};
 pub use socks5::Error;
 use std::net::{IpAddr, SocketAddr};
@@ -26,8 +26,7 @@ struct ProxyContext {
     pub connector: Connector,
 }
 
-#[tokio::main(flavor = "multi_thread")]
-pub async fn run(args: BootArgs) -> crate::Result<()> {
+pub fn run(args: BootArgs) -> crate::Result<()> {
     // Initialize the logger with a filter that ignores WARN level logs for netlink_proto
     let filter = EnvFilter::from_default_env()
         .add_directive(
@@ -64,7 +63,7 @@ pub async fn run(args: BootArgs) -> crate::Result<()> {
     #[cfg(target_family = "unix")]
     {
         use nix::sys::resource::{setrlimit, Resource};
-        let soft_limit = (args.concurrent * 2) as u64;
+        let soft_limit = (args.concurrent * 3) as u64;
         let hard_limit = 1048576;
         setrlimit(Resource::RLIMIT_NOFILE, soft_limit.into(), hard_limit)?;
     }
@@ -77,8 +76,14 @@ pub async fn run(args: BootArgs) -> crate::Result<()> {
         connector: Connector::new(args.cidr, args.fallback, args.connect_timeout),
     };
 
-    match args.proxy {
-        Proxy::Http { auth } => http::proxy(ctx(auth)).await,
-        Proxy::Socks5 { auth } => socks5::proxy(ctx(auth)).await,
-    }
+    tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .max_blocking_threads(args.concurrent)
+        .build()?
+        .block_on(async {
+            match args.proxy {
+                Proxy::Http { auth } => http::proxy(ctx(auth)).await,
+                Proxy::Socks5 { auth } => socks5::proxy(ctx(auth)).await,
+            }
+        })
 }

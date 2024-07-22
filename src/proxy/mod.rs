@@ -54,11 +54,7 @@ pub fn run(args: BootArgs) -> crate::Result<()> {
     tracing::info!("Concurrent: {}", args.concurrent);
     tracing::info!("Connect timeout: {:?}s", args.connect_timeout);
 
-    #[cfg(target_os = "linux")]
-    if let Some(cidr) = &args.cidr {
-        route::sysctl_ipv6_no_local_bind();
-        route::sysctl_route_add_cidr(&cidr).await;
-    }
+
 
     #[cfg(target_family = "unix")]
     {
@@ -81,6 +77,11 @@ pub fn run(args: BootArgs) -> crate::Result<()> {
         .max_blocking_threads(args.concurrent)
         .build()?
         .block_on(async {
+            #[cfg(target_os = "linux")]
+            if let Some(cidr) = &args.cidr {
+                route::sysctl_ipv6_no_local_bind();
+                route::sysctl_route_add_cidr(&cidr).await;
+            }
             match args.proxy {
                 Proxy::Http { auth } => http::proxy(ctx(auth)).await,
                 Proxy::Socks5 { auth } => socks5::proxy(ctx(auth)).await,

@@ -12,17 +12,16 @@
 
 # vproxy
 
-An easy and powerful Rust `HTTP`/`Socks5`/`HTTP2Socks5` proxy
+An easy and powerful Rust `HTTP`/`Socks5` proxy
 
 ## Features
 
 - IPv4/IPv6 priority
 - Configurable concurrency limits
-- Service binding `IP-CIDR` address
-- Fallback address when `IP-CIDR` address is unreachable
+- Service binding `CIDR` address
+- Fallback address when `CIDR` address is unreachable
 - Basic authentication
 - `Session`/`TTL`/`Http2Socks5`/`Whitelist` Extension
-- Proxy support (`HTTP`, `SOCKS5`, `HTTP2Socks5`)
 
 ## Sponsor
 
@@ -112,7 +111,7 @@ Append `-h2s-host|port|username|password` to the username, or `-h2s-host|port` i
 - Http proxy session with username and password:
 
 ```shell
-./vproxy run --bind 127.0.0.1:8101 -i 2001:470:70c6::/48 http -u test -p test
+vproxy run --bind 127.0.0.1:8101 -i 2001:470:70c6::/48 http -u test -p test
 
 $ for i in `seq 1 10`; do curl -x "http://test-session-123456789:test@127.0.0.1:8101" https://api6.ipify.org; done
 2001:470:70c6:93ee:9b7c:b4f9:4913:22f5
@@ -127,7 +126,7 @@ $ for i in `seq 1 10`; do curl -x "http://test-session-987654321:test@127.0.0.1:
 - Http proxy session with passwordless authorization:
 
 ```shell
-./vproxy run --bind 127.0.0.1:8101 -w 127.0.0.1 -i 2001:470:70c6::/48 http
+vproxy run --bind 127.0.0.1:8101 -w 127.0.0.1 -i 2001:470:70c6::/48 http
 
 $ for i in `seq 1 3`; do curl --proxy-header "session-id: 123456789" -x "http://159.223.22.161:8101" https://api6.ipify.org; done
 2001:470:70c6:93ee:9b7c:b4f9:4913:22f5
@@ -142,7 +141,7 @@ for i in `seq 1 3`; do curl --proxy-header "session-id: 987654321" -x "http://15
 - Socks5 proxy session with username and password
 
 ```shell
-./vproxy run --bind 127.0.0.1:8101 -i 2001:470:70c6::/48 socks5 -u test -p test
+vproxy run --bind 127.0.0.1:8101 -i 2001:470:70c6::/48 socks5 -u test -p test
 
 $ for i in `seq 1 3`; do curl -x "socks5h://test-session-123456789:test@127.0.0.1:8101" https://api6.ipify.org; done
 2001:470:70c6:93ee:9b7c:b4f9:4913:22f5
@@ -158,7 +157,7 @@ $ for i in `seq 1 3`; do curl -x "socks5h://test-session-987654321:test@127.0.0.
 - TTL proxy session with username and password
 
 ```shell
-./vproxy run --bind 127.0.0.1:8101 -i 2001:470:70c6::/48 socks5 -u test -p test
+vproxy run --bind 127.0.0.1:8101 -i 2001:470:70c6::/48 socks5 -u test -p test
 
 $ for i in `seq 1 3`; do curl -x "socks5h://test-ttl-2:test@127.0.0.1:8101" https://api6.ipify.org; done
 2001:470:70c6:93ee:9b7c:b4f9:4913:22f5
@@ -173,8 +172,8 @@ $ for i in `seq 1 3`; do curl -x "socks5h://test-ttl-2:test@127.0.0.1:8101" http
 - Http2Socks5 proxy session with username and password
 
 ```shell
-./vproxy run --bind "127.0.0.1:1080" http -u username -p password
-./vproxy run --bind "127.0.0.1:1081" socks5 -u user -p pass
+vproxy run --bind "127.0.0.1:1080" http -u username -p password
+vproxy run --bind "127.0.0.1:1081" socks5 -u user -p pass
 curl -x "http://username-h2s-127.0.0.1|1081|user|pass:password@127.0.0.1:1080" -s https://api.ip.sb/ip -A Mozilla
 ```
 
